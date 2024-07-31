@@ -16,7 +16,7 @@ def inscription(request):
     else:
         form = CustomUserCreationForm()
 
-    return render(request, 'inscription.html', {'form': form})
+    return render(request, 'auth/inscription.html', {'form': form})
 
 # Vue pour la connexion
 def connexion(request):
@@ -30,12 +30,7 @@ def connexion(request):
         else:
             messages.error(request, 'Nom d\'utilisateur ou mot de passe incorrect.')
 
-    return render(request, 'connexion.html')
-
-# Vue pour l'accueil
-@login_required
-def acceuil(request):
-    return render(request, 'acceuil.html')
+    return render(request, 'auth/connexion.html')
 
 # Vue pour la déconnexion
 def deconnexion(request):

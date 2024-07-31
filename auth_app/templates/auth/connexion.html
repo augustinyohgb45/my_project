@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page d'inscription</title>
+</head>
+<body>
+    <div class="container">
+        <div class="form">
+            <h1>Connexion</h1>
+
+            {% if message %}
+            <div class="error-message">
+                {% for message in message %}
+                <p class="error">{{message}}</p>
+                {% endfor %}
+            </div>  
+            {% endif %}
+            
+            <form method="post" action="{% url 'connexion' %}">
+                {% csrf_token %}
+                <label for="username">Nom d'utilisateur</label>
+                <input type="text" name="username" required>
+                <label for="password">Mot de passe</label>
+                <input type="password" name="password" required>
+                <button type="submit">Se connecter</button>
+            </form>
+            <p class="link">Pas encore inscrit ? <a href="{% url 'inscription' %}">S'inscrire</a></p>
+        </div>
+    </div>
+    
+    <style>
+        /* CSS */
+        /* Import Google font - Poppins */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        h1 {
+            margin: 20px 0;
+        }
+
+        body {
+            min-height: 100vh;
+            width: 100%;
+            background: #009579;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image : url("https://www.bing.com/images/search?view=detailV2&ccid=k%2fUtyzPw&id=607EC7A9A665ED2D8774A9F3996F3E96253063B6&thid=OIP.k_UtyzPwBxbJgvy1LHpDwAAAAA&mediaurl=https%3a%2f%2fmomo.mtn.com%2fwp-content%2fuploads%2fsites%2f15%2f2022%2f07%2fGroup-360.png%3ffit%3d360%252C360&cdnurl=https%3a%2f%2fth.bing.com%2fth%2fid%2fR.93f52dcb33f00716c982fcb52c7a43c0%3frik%3dtmMwJZY%252bb5nzqQ%26pid%3dImgRaw%26r%3d0&exph=360&expw=360&q=mtn+cote+d%27ivoire+momo&simid=607993788826154650&FORM=IRPRST&ck=1C721CB5689000D5ADC3B54B45809D8A&selectedIndex=5&itb=0");
+        }
+
+        .container {
+            width: 400px;
+            background: #fff;
+            border-radius: 7px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .container .form {
+            padding: 30px;
+        }
+
+        label {
+            padding: 10px 0;
+            color: #009579;
+            cursor: pointer;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            font-size: 17px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            outline: none;
+            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+
+        a {
+            font-size: 16px;
+            color: #009579;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        button {
+            color: #fff;
+            background: #009579;
+            width: 100%;
+            padding: 10px;
+            font-size: 17px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 6px;
+            outline: none;
+        }
+
+        button:hover {
+            background: #006653;
+        }
+
+        .link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .error {
+            background-color: red;
+            color: #fff;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
+</body>
+</html>

@@ -1,11 +1,8 @@
 from django.contrib import admin
-from django.urls import path
-from auth_app import views
+from django.urls import path, include 
 
 urlpatterns = [
     path('admin/', admin.site.urls),  # Route pour accéder à l'interface d'administration
-    path('', views.inscription, name='inscription'),  # Route pour la page d'inscription
-    path('connexion/', views.connexion, name='connexion'),  # Route pour la page de connexion
-    path('acceuil/', views.acceuil, name='acceuil'),  # Route pour la page d'accueil
-    path('deconnexion/', views.deconnexion, name='deconnexion'),  # Route
+    path('auth_app/', include('auth_app.urls') ),  # Route pour la page de connexion
+    path('dashboard/', include('dashboard.urls')),  # Route pour la page d'accueil
 ]

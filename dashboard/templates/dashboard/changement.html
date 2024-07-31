@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire de Changement</title>
+    <link href="{% static 'css/changement.css' %}" rel="stylesheet">
+
+</head>
+<body>
+    <div class="container">
+        <form id="changeForm">
+            <h2>Enregistrement d'un Changement</h2>
+           
+            <div class="form-group">
+                <input type="text" id="service_impacte" placeholder = "Entrer le service impacté" name="service_impacte" required>
+            </div>
+            <div class="form-group">
+                <label for="statut">Entrer la date</label>
+                <input type="date" id="date_enregistrement" placeholder="Entrer la date enregistrement" name="date_enregistrement" required>
+            </div>
+            <div class="form-group">
+                <label for="statut">Date prévu pour le changement</label>
+                <input type="date" id="date_changement" placeholder="Entrer le date prévu pour le changement" name="date_changement" required>
+            </div>
+            <div class="form-group">
+                <label for="statut">Date de fin du changement </label>
+                <input type="date" id="fin_changement" placeholder="Entrer la date de fin du changement" name="fin_changement" required>
+            </div>
+            <div class="form-group">
+                <label for="statut">Date envoie </label>
+                <input type="date" id="date_envoie" placeholder="Entrer la date d'envoie du changement" name="date_envoie" >
+            </div>
+            <div class="form-group">
+
+                <textarea id="description" placeholder="Description" name="description" rows="4" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="statut">Statut</label>
+                <select id="statut" name="statut" required>
+                    <option value="en cours">En Cours</option>
+                    <option value="terminé">cloturé</option>
+                </select>
+            </div>
+            <button type="submit">Soumettre</button>
+        </form>
+    </div>
+</body>
+</html>

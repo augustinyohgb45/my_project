@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{% static 'css/incident.css' %}" rel="stylesheet">
+
+
+    <title>Incident</title>
+</head>
+<body>
+    <div class="container">
+        <form id="changeForm">
+            <h2>Enregistrement d'un incident</h2>
+           
+            <div class="form-group">
+                <input type="text" id="service_impacte" placeholder = "Entrer le service impacté" name="service_impacte" required>
+            </div>
+            <div class="form-group">
+                <label for="statut">Entrer la date</label>
+                <input type="date" id="date_enregistrement" placeholder="Entrer la date enregistrement" name="date_enregistrement" required>
+            </div>
+            <div class="form-group">
+
+                <textarea id="description" placeholder="Description" name="description" rows="4" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="statut">Statut</label>
+                <select id="statut" name="statut" required>
+                    <option value="en cours">En Cours</option>
+                    <option value="terminé">cloturé</option>
+                </select>
+            </div>
+            <button type="submit">Soumettre</button>
+        </form>
+    </div>
+</body>
+</html>
