@@ -7,6 +7,9 @@ class Destinataire(models.Model):
     nom = models.CharField(max_length = 40)
     contact = models.CharField(max_length = 10)
     email = models.EmailField()
+    
+    def __str__(self):
+        return self.nom
 
 class Changement(models.Model):
     TYPE_STATUT = (("E","en cours"),("C","cloture"))
@@ -26,7 +29,7 @@ class Incident(models.Model):
     services_impacte = models.CharField(max_length = 500)
     date_enregistrement = models.DateTimeField(auto_now_add = True)
     description = models.TextField()
-    destinataires = models.ForeignKey(Destinataire, on_delete = models.PROTECT )
+    destinataires = models.ManyToManyField(Destinataire)
     user = models.ForeignKey(User, on_delete = models.DO_NOTHING )
     statut = models.CharField(choices = TYPE_STATUT, default = "en cours", max_length = 12)
     

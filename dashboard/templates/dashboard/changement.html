@@ -7,45 +7,112 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulaire de Changement</title>
     <link href="{% static 'css/changement.css' %}" rel="stylesheet">
-
+    <style>
+        .step { display: none; }
+        .step.active { display: block; }
+        .error { color: red; }
+    </style>
 </head>
 <body>
     <div class="container">
-        <form id="changeForm">
-            <h2>Enregistrement d'un Changement</h2>
-           
-            <div class="form-group">
-                <input type="text" id="service_impacte" placeholder = "Entrer le service impacté" name="service_impacte" required>
+        <h2>Créer un nouveau changement</h2>
+        <form id="changeForm" method="post">
+            {% csrf_token %}
+            
+            <!-- Étape 1 -->
+            <div class="step active" id="step1">
+                <div class="form-group">
+                    <label for="services_impacte">Service Impacté</label>
+                    <input type="text" id="services_impacte" placeholder="Entrer le service impacté" name="services_impacte" required>
+                    <div id="services_impacte-error" class="error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="date_changement">Date prévue pour le changement</label>
+                    <input type="date" id="date_changement" placeholder="Entrer la date prévue pour le changement" name="date_changement" required>
+                    <div id="date_changement-error" class="error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="fin_changement">Date de fin du changement</label>
+                    <input type="date" id="fin_changement" placeholder="Entrer la date de fin du changement" name="fin_changement" required>
+                    <div id="fin_changement-error" class="error"></div>
+                </div>
+                <button type="button" onclick="nextStep()">Suivant</button>
             </div>
-            <div class="form-group">
-                <label for="statut">Entrer la date</label>
-                <input type="date" id="date_enregistrement" placeholder="Entrer la date enregistrement" name="date_enregistrement" required>
+            
+            <!-- Étape 2 -->
+            <div class="step" id="step2">
+                <div class="form-group">
+                    <label for="date_envoie">Date d'envoi</label>
+                    <input type="date" id="date_envoie" placeholder="Entrer la date d'envoi" name="date_envoie">
+                    <div id="date_envoie-error" class="error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" placeholder="Description" name="description" rows="4" required></textarea>
+                    <div id="description-error" class="error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="destinataires">Destinataires</label>
+                    <input type="text" id="destinataires" placeholder="Entrer les destinataires" name="destinataires" required>
+                    <div id="destinataires-error" class="error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="statut">Statut</label>
+                    <select id="statut" name="statut" required>
+                        <option value="en cours">En Cours</option>
+                        <option value="terminé">Clôturé</option>
+                    </select>
+                    <div id="statut-error" class="error"></div>
+                </div>
+                <button type="button" onclick="prevStep()">Précédent</button>
+                <button type="submit">Soumettre</button>
             </div>
-            <div class="form-group">
-                <label for="statut">Date prévu pour le changement</label>
-                <input type="date" id="date_changement" placeholder="Entrer le date prévu pour le changement" name="date_changement" required>
-            </div>
-            <div class="form-group">
-                <label for="statut">Date de fin du changement </label>
-                <input type="date" id="fin_changement" placeholder="Entrer la date de fin du changement" name="fin_changement" required>
-            </div>
-            <div class="form-group">
-                <label for="statut">Date envoie </label>
-                <input type="date" id="date_envoie" placeholder="Entrer la date d'envoie du changement" name="date_envoie" >
-            </div>
-            <div class="form-group">
-
-                <textarea id="description" placeholder="Description" name="description" rows="4" required></textarea>
-            </div>
-            <div class="form-group">
-                <label for="statut">Statut</label>
-                <select id="statut" name="statut" required>
-                    <option value="en cours">En Cours</option>
-                    <option value="terminé">cloturé</option>
-                </select>
-            </div>
-            <button type="submit">Soumettre</button>
         </form>
     </div>
+
+    <script>
+        let currentStep = 1;
+        const steps = document.querySelectorAll('.step');
+        
+        function showStep(step) {
+            steps.forEach((element, index) => {
+                element.classList.toggle('active', index + 1 === step);
+            });
+        }
+
+        function validateStep(step) {
+            let isValid = true;
+            const fields = steps[step - 1].querySelectorAll('input, select, textarea');
+            fields.forEach(field => {
+                const errorDiv = document.querySelector(`#${field.name}-error`);
+                errorDiv.textContent = '';
+                if (field.required && !field.value.trim()) {
+                    errorDiv.textContent = `Le champ ${field.previousElementSibling.textContent} est obligatoire.`;
+                    isValid = false;
+                }
+            });
+            return isValid;
+        }
+
+        function nextStep() {
+            if (validateStep(currentStep)) {
+                if (currentStep < steps.length) {
+                    currentStep++;
+                    showStep(currentStep);
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            showStep(currentStep);
+        });
+    </script>
 </body>
 </html>

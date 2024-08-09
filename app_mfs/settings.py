@@ -61,6 +61,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'app_mfs.wsgi.application'
 
 
+
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
@@ -78,6 +79,7 @@ DATABASES = {
     }
 }
 
+LOGIN_URL = 'connexion'
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
@@ -124,3 +126,13 @@ STATIC_URL="static/"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# EMAIL CONFIGURATION
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_HOST_USER = "gbetibouoyohjean@gmail.com"
+EMAIL_HOST_PASSWORD = "wymhnjvyfzqkqfeh"
+EMAIL_USE_TLS = True

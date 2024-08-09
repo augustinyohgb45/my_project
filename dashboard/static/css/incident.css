@@ -1,13 +1,17 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
-    /* background : url(OIP.jpeg); */
+    background-color: #FFD700;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
+    background-image: url("https://th.bing.com/th/id/OIP.k_UtyzPwBxbJgvy1LHpDwAAAAA?w=202&h=202&c=7&r=0&o=5&dpr=1.5&pid=1.7");
+    background-repeat: no-repeat;
+    background-size: cover; /* This makes the image cover the entire background */
+    background-position: center; /* This centers the image in the background */
 }
+
 
 .container {
     background: #fff;
@@ -25,6 +29,7 @@ h2 {
 
 .form-group {
     margin-bottom: 15px;
+    resize: none;
 }
 
 label {
@@ -32,6 +37,10 @@ label {
     margin-bottom: 5px;
     font-weight: bold;
     color: #555;
+}
+
+.description {
+   resize: none;
 }
 
 input, textarea, select {

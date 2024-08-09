@@ -6,35 +6,98 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{% static 'css/incident.css' %}" rel="stylesheet">
-
-
     <title>Incident</title>
+    <style>
+        .step { display: none; }
+        .step.active { display: block; }
+        .error { color: red; }
+    </style>
 </head>
 <body>
     <div class="container">
-        <form id="changeForm">
-            <h2>Enregistrement d'un incident</h2>
-           
-            <div class="form-group">
-                <input type="text" id="service_impacte" placeholder = "Entrer le service impacté" name="service_impacte" required>
+        <h2>Ajouter un nouveau incident</h2>
+        <form id="changeForm" method="post">
+            {% csrf_token %}
+            
+            <!-- Étape 1 -->
+            <div class="step active" id="step1">
+                <div class="form-group">
+                    <label for="services_impacte">Service Impacté</label>
+                    {{ form.services_impacte }}
+                    <div id="step1-error" class="error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    {{ form.description }}
+                    <div id="step1-error" class="error"></div>
+                </div>
+                <button type="button" onclick="nextStep()">Suivant</button>
             </div>
-            <div class="form-group">
-                <label for="statut">Entrer la date</label>
-                <input type="date" id="date_enregistrement" placeholder="Entrer la date enregistrement" name="date_enregistrement" required>
+            
+            <!-- Étape 2 -->
+            <div class="step" id="step2">
+                <div class="form-group">
+                    <label for="destinataires" >Destinataires</label>
+                    {{ form.destinataires }}
+                    {% comment %} <input type="email" id="destinataires" placeholder="Entrer les destinataire" name="destinataires" required> {% endcomment %}
+                    <div id="step2-error" class="error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="statut">Statut</label>
+                    {{ form.statut }}
+                    <div id="step2-error" class="error"></div>
+                </div>
+                <button type="button" onclick="prevStep()">Précédent</button>
+                <button type="submit">Soumettre</button>
             </div>
-            <div class="form-group">
-
-                <textarea id="description" placeholder="Description" name="description" rows="4" required></textarea>
-            </div>
-            <div class="form-group">
-                <label for="statut">Statut</label>
-                <select id="statut" name="statut" required>
-                    <option value="en cours">En Cours</option>
-                    <option value="terminé">cloturé</option>
-                </select>
-            </div>
-            <button type="submit">Soumettre</button>
         </form>
     </div>
+
+    <script>
+        let currentStep = 1;
+        const steps = document.querySelectorAll('.step');
+        
+        function showStep(step) {
+            steps.forEach((element, index) => {
+                element.classList.toggle('active', index + 1 === step);
+            });
+        }
+
+        function validateStep(step) {
+            let isValid = true;
+            const fields = steps[step - 1].querySelectorAll('input, select, textarea');
+            const errorDiv = document.querySelector(`#step${step}-error`);
+            errorDiv.textContent = '';
+
+            fields.forEach(field => {
+                if (field.required && !field.value.trim()) {
+                    errorDiv.textContent += `Le champ ${field.previousElementSibling.textContent} est obligatoire. `;
+                    isValid = false;
+                }
+            });
+
+            return isValid;
+        }
+
+        function nextStep() {
+            if (validateStep(currentStep)) {
+                if (currentStep < steps.length) {
+                    currentStep++;
+                    showStep(currentStep);
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            showStep(currentStep);
+        });
+    </script>
 </body>
 </html>
