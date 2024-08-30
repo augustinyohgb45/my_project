@@ -90,7 +90,9 @@
 	 *        "sort": false
 	 *      } );
 	 *    } );
+	 * 
 	 */
+	
 	var DataTable = function ( options )
 	{
 		/**

@@ -388,30 +388,45 @@
                                             <th>fin changement</th>
                                             <th>date envoie</th>
                                             <th>utilisateur</th>
-                                            <th>destinataire</th>
                                             <th>Destinataires</th>
+                                            <th>destinataire nouveau</th>
+                                            <th>description</th>
                                             <th>statut</th>
+                                            <th>action</th>
 
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for incident in incidents %}
+                                        {% for changement in changements %}
                                             <tr>
                                                 <td>{{ changement.id }}</td>
-                                                <td>{{ changement.service_impacte }}</td>
+                                                <td>{{ changement.services_impacte }}</td>
                                                 <td>{{ changement.date_enregistrement }}</td>
                                                 <td>{{ changement.date_changement }}</td>
                                                 <td>{{ changement.fin_changement }}</td>
                                                 <td>{{ changement.date_envoie }}</td>
-                                                <td>{{ changement.description }}</td>
                                                 <td>{{ changement.user.username }}</td>
-                                                <td>{{ changement.destinataires }}</td>
                                                 <td>
-                                                    {% for destinataire in incident.destinataires.all %}
-                                                        {{ destinataire.nom }}{% if not forloop.last %}, {% endif %}
-                                                    {% endfor %}
+                                                    {{ changement.destinataires.nom }}
                                                 </td>
-                                                <td>{{ incident.get_statut_display }}</td>
+                                                <td>{{ changement.destinataire_nouveau }}</td>
+                                                <td>{{ changement.description }}</td>  
+                                                
+                                                <td>{{ changement.get_statut_display }}</td>
+                                                <td>
+                                                
+                                                    {% if changement.en_cours %}
+                                                    <form action="{% url 'action_statut_change' changement.id %}" method="POST">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-success">cloture</button>
+                                                    </form>
+                                                    {% else %}
+                                                    <button class="btn btn-info">en cours</button>
+                                                    {% endif %}
+                                                        
+                                                    
+                                                   
+                                                </td>
                                             </tr>
                                         {% endfor %}
                                     </tbody>

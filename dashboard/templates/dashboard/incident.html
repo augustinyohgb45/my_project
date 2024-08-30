@@ -15,13 +15,26 @@
 </head>
 <body>
     <div class="container">
-        <h2>Ajouter un nouveau incident</h2>
+        <h2>Notifier incident</h2>
         <form id="changeForm" method="post">
             {% csrf_token %}
             
             <!-- Étape 1 -->
             <div class="step active" id="step1">
                 <div class="form-group">
+    
+                    <label for="Numero_ticket">numero ticket</label>
+                    {{ form.Numero_ticket  }}
+                    <div id="step1-error" class="error"></div>
+                </div>
+                <div class="form-group">
+    
+                    <label for="Type_requette_id">Type de incident</label>
+                    {{ form.Type_requette_id }}
+                    <div id="step1-error" class="error"></div>
+                </div>
+                <div class="form-group">
+    
                     <label for="services_impacte">Service Impacté</label>
                     {{ form.services_impacte }}
                     <div id="step1-error" class="error"></div>
@@ -36,9 +49,15 @@
             
             <!-- Étape 2 -->
             <div class="step" id="step2">
-                <div class="form-group">
+                {% comment %} <div class="form-group">
                     <label for="destinataires" >Destinataires</label>
-                    {{ form.destinataires }}
+                    {{ form.destinataires }} {% endcomment %}
+                    {% comment %} <input type="email" id="destinataires" placeholder="Entrer les destinataire" name="destinataires" required> {% endcomment %}
+                    {% comment %} <div id="step2-error" class="error"></div>
+                </div> {% endcomment %}
+                <div class="form-group">
+                    <label for="destinataires" >entrer email du nouveau destinataire</label>
+                    {{ form.destinataire_nouveau }}
                     {% comment %} <input type="email" id="destinataires" placeholder="Entrer les destinataire" name="destinataires" required> {% endcomment %}
                     <div id="step2-error" class="error"></div>
                 </div>

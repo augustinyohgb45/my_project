@@ -5,8 +5,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulaire de Changement</title>
-    <link href="{% static 'css/changement.css' %}" rel="stylesheet">
+    <link href="{% static 'css/incident.css' %}" rel="stylesheet">
+    <title>Changement</title>
     <style>
         .step { display: none; }
         .step.active { display: block; }
@@ -14,8 +14,19 @@
     </style>
 </head>
 <body>
+    
+    {% if messages %}
+    <div class="container bg-danger">
+        
+        {% for message in messages %}
+            <span>{{message}}</span>
+        {% endfor %}
+            
+    </div>
+    {% endif %}
+        
     <div class="container">
-        <h2>Créer un nouveau changement</h2>
+        <h2>Notifier changement</h2>
         <form id="changeForm" method="post">
             {% csrf_token %}
             
@@ -23,18 +34,33 @@
             <div class="step active" id="step1">
                 <div class="form-group">
                     <label for="services_impacte">Service Impacté</label>
-                    <input type="text" id="services_impacte" placeholder="Entrer le service impacté" name="services_impacte" required>
-                    <div id="services_impacte-error" class="error"></div>
+                    {{ form.services_impacte }}
+                    <div id="step1-error" class="error"></div>
                 </div>
                 <div class="form-group">
-                    <label for="date_changement">Date prévue pour le changement</label>
-                    <input type="date" id="date_changement" placeholder="Entrer la date prévue pour le changement" name="date_changement" required>
-                    <div id="date_changement-error" class="error"></div>
+                    <label for="Type_requette_changement_id">Type de changement</label>
+                    {{ form.Type_requette_changement_id }}
+                    <div id="step1-error" class="error"></div>
                 </div>
                 <div class="form-group">
-                    <label for="fin_changement">Date de fin du changement</label>
-                    <input type="date" id="fin_changement" placeholder="Entrer la date de fin du changement" name="fin_changement" required>
-                    <div id="fin_changement-error" class="error"></div>
+                    <label for="date_changement">Date du Changement</label>
+                    {{ form.date_changement }}
+                    <div id="step1-error" class="error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="fin_changement">Date de Fin du Changement</label>
+                    {{ form.fin_changement }}
+                    <div id="step1-error" class="error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="date_envoie">Date d'Envoi du Changement</label>
+                    {{ form.date_envoie }}
+                    <div id="step1-error" class="error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    {{ form.description }}
+                    <div id="step1-error" class="error"></div>
                 </div>
                 <button type="button" onclick="nextStep()">Suivant</button>
             </div>
@@ -42,27 +68,34 @@
             <!-- Étape 2 -->
             <div class="step" id="step2">
                 <div class="form-group">
-                    <label for="date_envoie">Date d'envoi</label>
-                    <input type="date" id="date_envoie" placeholder="Entrer la date d'envoi" name="date_envoie">
-                    <div id="date_envoie-error" class="error"></div>
+                    <label for="heure_debut">heure_debut</label>
+                    {{ form.heure_debut }}
+                    <div id="step2-error" class="error"></div>
                 </div>
                 <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea id="description" placeholder="Description" name="description" rows="4" required></textarea>
-                    <div id="description-error" class="error"></div>
+                    <label for="heure_fin">heure_fin</label>
+                    {{ form.heure_fin }}
+                    <div id="step2-error" class="error"></div>
                 </div>
                 <div class="form-group">
+                    <label for="nom_plateforme">nom plateforme</label>
+                    {{ form.nom_plateforme }}
+                    <div id="step2-error" class="error"></div>
+                </div>
+                {% comment %} <div class="form-group">
                     <label for="destinataires">Destinataires</label>
-                    <input type="text" id="destinataires" placeholder="Entrer les destinataires" name="destinataires" required>
-                    <div id="destinataires-error" class="error"></div>
+                    {{ form.destinataires }}
+                    <div id="step2-error" class="error"></div>
+                </div> {% endcomment %}
+                <div class="form-group">
+                    <label for="destinataire_nouveau">Nouveau Destinataire</label>
+                    {{ form.destinataire_nouveau }}
+                    <div id="step2-error" class="error"></div>
                 </div>
                 <div class="form-group">
                     <label for="statut">Statut</label>
-                    <select id="statut" name="statut" required>
-                        <option value="en cours">En Cours</option>
-                        <option value="terminé">Clôturé</option>
-                    </select>
-                    <div id="statut-error" class="error"></div>
+                    {{ form.statut }}
+                    <div id="step2-error" class="error"></div>
                 </div>
                 <button type="button" onclick="prevStep()">Précédent</button>
                 <button type="submit">Soumettre</button>
@@ -74,26 +107,35 @@
         let currentStep = 1;
         const steps = document.querySelectorAll('.step');
         
+        // Fonction pour afficher l'étape actuelle et masquer les autres
         function showStep(step) {
             steps.forEach((element, index) => {
                 element.classList.toggle('active', index + 1 === step);
             });
         }
 
+        // Fonction pour valider l'étape actuelle avant de passer à l'étape suivante
         function validateStep(step) {
             let isValid = true;
             const fields = steps[step - 1].querySelectorAll('input, select, textarea');
+            const errorDiv = document.querySelector(`#step${step}-error`);
+            if (errorDiv) {
+                errorDiv.textContent = ''; // Efface les messages d'erreur existants
+            }
+
             fields.forEach(field => {
-                const errorDiv = document.querySelector(`#${field.name}-error`);
-                errorDiv.textContent = '';
                 if (field.required && !field.value.trim()) {
-                    errorDiv.textContent = `Le champ ${field.previousElementSibling.textContent} est obligatoire.`;
+                    if (errorDiv) {
+                        errorDiv.textContent += `Le champ ${field.previousElementSibling.textContent} est obligatoire. `;
+                    }
                     isValid = false;
                 }
             });
+
             return isValid;
         }
 
+        // Fonction pour aller à l'étape suivante
         function nextStep() {
             if (validateStep(currentStep)) {
                 if (currentStep < steps.length) {
@@ -103,6 +145,7 @@
             }
         }
 
+        // Fonction pour revenir à l'étape précédente
         function prevStep() {
             if (currentStep > 1) {
                 currentStep--;
@@ -110,6 +153,7 @@
             }
         }
 
+        // Afficher l'étape initiale lors du chargement de la page
         document.addEventListener('DOMContentLoaded', () => {
             showStep(currentStep);
         });

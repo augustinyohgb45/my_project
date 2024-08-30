@@ -14,12 +14,24 @@ body {
 
 
 .container {
+    display: flex;
+    flex-direction: column;
     background: #fff;
-    padding: 20px 30px;
+    padding: 60px 10px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     animation: fadeIn 1s ease-in-out;
+    width: 500px;
 }
+
+textarea{
+    height: 40px;
+}
+
+/* .form-group_text{
+    height: 5px;
+    width: 100px;
+} */
 
 h2 {
     text-align: center;
