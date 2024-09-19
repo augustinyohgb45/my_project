@@ -60,11 +60,11 @@
 
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
+                {% comment %} <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
                     aria-expanded="true" aria-controls="collapseTwo">
                     <i class="fas fa-fw fa-cog"></i>
                     <span>enregistrement reçents</span>
-                </a>
+                </a> {% endcomment %}
                 {% comment %} <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Custom Components:</h6>
@@ -442,7 +442,7 @@
                                             
                                             <div class="row no-gutters align-items-center">
                                                 <div class="col-auto">
-                                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800"> {{ changement_en_cours }}</div>
+                                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800"> {{ nb_changement_en_cours }}</div>
                                                 </div>
                                                 <div class="col">
                                                     {% comment %} <div class="progress progress-sm mr-2">

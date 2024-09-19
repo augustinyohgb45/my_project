@@ -384,6 +384,7 @@
                                         <tr>
                                             <th>id</th>
                                             <th>Service Impacté</th>
+                                            <th>type incident</th>
                                             <th>Date d'Enregistrement</th>
                                             <th>Description</th>
                                             <th>Utilisateur</th>
@@ -397,6 +398,7 @@
                                         <tr>
                                             <td>{{ incident.id }}</td>
                                             <td>{{ incident.services_impacte }}</td>
+                                            <td>{{ incident.type_requette.nom }}</td>
                                             <td>{{ incident.date_enregistrement }}</td>
                                             <td>{{ incident.description }}</td>
                                             <td>{{ incident.user.username }}</td>

@@ -1,141 +1,204 @@
-<!DOCTYPE html>
 {% load static %}
-
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{% static 'css/incident.css' %}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <title>Changement</title>
     <style>
         .step { display: none; }
         .step.active { display: block; }
         .error { color: red; }
+        #new-type-container, #new-service-container { display: none; }
     </style>
 </head>
 <body>
-    
-    {% if messages %}
-    <div class="container bg-danger">
-        
-        {% for message in messages %}
-            <span>{{message}}</span>
-        {% endfor %}
+    <!-- Button trigger modal -->
+<!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    Launch demo modal
+  </button>
+   -->
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form action="" method="post">
+            <input type="text" placeholder="nom de la requette">
+            <input type="text" placeholder="nom du desti">
+            <input type="email" placeholder="email du desti">
+            <input type="text" placeholder="contact du destinataire">
+            <textarea name="" id="" placeholder="message"></textarea>
             
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" >Save changes</button>
+        </div>
+      </div>
     </div>
-    {% endif %}
-        
+  </div>
     <div class="container">
-        <h2>Notifier changement</h2>
+        <h2>Notifier un Changement</h2>
+        {% for message in messages %}
+        <div class="alert {{ message.tags }} alert-dismissible" role="alert">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close"> 
+            <span aria-hidden="true">&times;</span>
+          </button>
+          {{ message|safe }}
+        </div>
+        {% endfor %}
         <form id="changeForm" method="post">
             {% csrf_token %}
             
             <!-- Étape 1 -->
             <div class="step active" id="step1">
                 <div class="form-group">
-                    <label for="services_impacte">Service Impacté</label>
-                    {{ form.services_impacte }}
-                    <div id="step1-error" class="error"></div>
+                    <label for="Numero_ticket">Numéro de ticket</label>
+                    {{ form.Numero_ticket }}
                 </div>
+                
                 <div class="form-group">
-                    <label for="Type_requette_changement_id">Type de changement</label>
-                    {{ form.Type_requette_changement_id }}
-                    <div id="step1-error" class="error"></div>
+                    <label for="services_impacte">Service</label>
+                    <select id="services_impacte" name="services_impacte" onchange="handleServiceChange()">
+                        {% for choice in form.services_impacte.field.queryset %}
+                            <option value="{{ choice.id }}">{{ choice }}</option>
+                        {% endfor %}
+                        
+                    </select>
+                    
                 </div>
+                
+                <!-- Nouveau service -->
+                <div class="form-group" id="new-service-container">
+                    <label for="new_service">Nouveau service</label>
+                    <input type="text" id="new_service" name="new_service" placeholder="Entrez le nouveau service">
+                </div>
+                
                 <div class="form-group">
-                    <label for="date_changement">Date du Changement</label>
-                    {{ form.date_changement }}
-                    <div id="step1-error" class="error"></div>
+                    <label for="Type_requette_changement">Type de changement</label>
+                    <select id="Type_requette_changement" name="Type_requette_changement" onchange="handleTypeChange()">
+                        {% for choice in form.Type_requette_changement.field.queryset %}
+                            <option value="{{ choice.id }}">{{ choice }}</option>
+                        {% endfor %}
+                        <option  value="add_new">Ajouter nouveau type</option>
+                    </select>
+                    <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal">Ajouter nouveau service</button>
                 </div>
-                <div class="form-group">
-                    <label for="fin_changement">Date de Fin du Changement</label>
-                    {{ form.fin_changement }}
-                    <div id="step1-error" class="error"></div>
+
+                <!-- Nouveau type de changement -->
+                <div class="form-group" id="new-type-container">
+                    <label for="new_type">Nouveau type de changement</label>
+                    <input type="text" id="new_type" name="new_type" placeholder="Entrez le nouveau type">
                 </div>
-                <div class="form-group">
-                    <label for="date_envoie">Date d'Envoi du Changement</label>
-                    {{ form.date_envoie }}
-                    <div id="step1-error" class="error"></div>
-                </div>
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    {{ form.description }}
-                    <div id="step1-error" class="error"></div>
-                </div>
+
                 <button type="button" onclick="nextStep()">Suivant</button>
             </div>
             
             <!-- Étape 2 -->
             <div class="step" id="step2">
                 <div class="form-group">
-                    <label for="heure_debut">heure_debut</label>
+                    <label for="date_changement">Date de changement</label>
+                    {{ form.date_changement }}
+                </div>
+                <div class="form-group">
+                    <label for="fin_changement">Date de fin de changement</label>
+                    {{ form.fin_changement }}
+                </div>
+                <div class="form-group">
+                    <label for="date_envoie">Date d'envoi</label>
+                    {{ form.date_envoie }}
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    {{ form.description }}
+                </div>
+                <button type="button" onclick="prevStep()">Précédent</button>
+                <button type="button" onclick="nextStep()">Suivant</button>
+            </div>
+
+            <!-- Étape 3 -->
+            <div class="step" id="step3">
+                <div class="form-group">
+                    <label for="heure_debut">Heure de début</label>
                     {{ form.heure_debut }}
-                    <div id="step2-error" class="error"></div>
                 </div>
                 <div class="form-group">
-                    <label for="heure_fin">heure_fin</label>
+                    <label for="heure_fin">Heure de fin</label>
                     {{ form.heure_fin }}
-                    <div id="step2-error" class="error"></div>
                 </div>
                 <div class="form-group">
-                    <label for="nom_plateforme">nom plateforme</label>
+                    <label for="nom_plateforme">Nom de la plateforme</label>
                     {{ form.nom_plateforme }}
-                    <div id="step2-error" class="error"></div>
                 </div>
-                {% comment %} <div class="form-group">
-                    <label for="destinataires">Destinataires</label>
-                    {{ form.destinataires }}
-                    <div id="step2-error" class="error"></div>
-                </div> {% endcomment %}
                 <div class="form-group">
-                    <label for="destinataire_nouveau">Nouveau Destinataire</label>
+                    <label for="destinataire_nouveau">Nouveau destinataire</label>
                     {{ form.destinataire_nouveau }}
-                    <div id="step2-error" class="error"></div>
                 </div>
                 <div class="form-group">
                     <label for="statut">Statut</label>
                     {{ form.statut }}
-                    <div id="step2-error" class="error"></div>
                 </div>
                 <button type="button" onclick="prevStep()">Précédent</button>
-                <button type="submit">Soumettre</button>
+                <button type="submit">Envoyer</button>
             </div>
         </form>
     </div>
 
     <script>
+        function handleTypeChange() {
+            const selectElement = document.getElementById('Type_requette_changemen');
+            const newTypeContainer = document.getElementById('new-type-container');
+            newTypeContainer.style.display = selectElement.value === 'add_new' ? 'block' : 'none';
+        }
+
+        function handleServiceChange() {
+            const selectElement = document.getElementById('services_impacte');
+            const newServiceContainer = document.getElementById('new-service-container');
+            newServiceContainer.style.display = selectElement.value === 'add_new_service' ? 'block' : 'none';
+        }
+
         let currentStep = 1;
         const steps = document.querySelectorAll('.step');
-        
-        // Fonction pour afficher l'étape actuelle et masquer les autres
+
         function showStep(step) {
             steps.forEach((element, index) => {
                 element.classList.toggle('active', index + 1 === step);
             });
         }
 
-        // Fonction pour valider l'étape actuelle avant de passer à l'étape suivante
         function validateStep(step) {
             let isValid = true;
             const fields = steps[step - 1].querySelectorAll('input, select, textarea');
             const errorDiv = document.querySelector(`#step${step}-error`);
+
             if (errorDiv) {
-                errorDiv.textContent = ''; // Efface les messages d'erreur existants
+                errorDiv.textContent = '';
             }
 
             fields.forEach(field => {
                 if (field.required && !field.value.trim()) {
-                    if (errorDiv) {
-                        errorDiv.textContent += `Le champ ${field.previousElementSibling.textContent} est obligatoire. `;
-                    }
                     isValid = false;
+                    if (errorDiv) {
+                        errorDiv.textContent += `Le champ "${field.previousElementSibling.textContent.trim()}" est requis. `;
+                    }
+                    field.style.borderColor = 'red';
+                } else {
+                    field.style.borderColor = '';
                 }
             });
 
             return isValid;
         }
 
-        // Fonction pour aller à l'étape suivante
         function nextStep() {
             if (validateStep(currentStep)) {
                 if (currentStep < steps.length) {
@@ -145,7 +208,6 @@
             }
         }
 
-        // Fonction pour revenir à l'étape précédente
         function prevStep() {
             if (currentStep > 1) {
                 currentStep--;
@@ -153,10 +215,11 @@
             }
         }
 
-        // Afficher l'étape initiale lors du chargement de la page
         document.addEventListener('DOMContentLoaded', () => {
             showStep(currentStep);
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  
 </body>
 </html>

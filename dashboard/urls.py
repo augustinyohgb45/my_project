@@ -1,5 +1,5 @@
 from django.urls import path 
-from dashboard import views 
+from . import views 
 
 urlpatterns = [
     path('acceuil/', views.acceuil, name='acceuil'),  # Route pour la page d'accueil
@@ -8,5 +8,5 @@ urlpatterns = [
     path('listeincident/', views.listeincident, name='listeincident'),#route liste incident
     path('listechangement/', views.listechangement, name='listechangement'),#route liste changement
     path('action_statut/<int:incident_id>', views.action_statut, name='action_statut'),
-    path('action_statut_change/<int:changement_id>', views.action_statut_change, name='action_statut_change')
+    path('action_statut_change/<int:changement_id>', views.action_statut_change, name='action_statut_change'),
 ]

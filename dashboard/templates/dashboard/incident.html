@@ -23,28 +23,28 @@
             <div class="step active" id="step1">
                 <div class="form-group">
     
-                    <label for="Numero_ticket">numero ticket</label>
-                    {{ form.Numero_ticket  }}
+                    <label for="numero_ticket">number ticket</label>
+                    {{ form.numero_ticket  }}
                     <div id="step1-error" class="error"></div>
                 </div>
                 <div class="form-group">
     
-                    <label for="Type_requette_id">Type de incident</label>
-                    {{ form.Type_requette_id }}
+                    <label for="type_requette">incident type</label>
+                    {{ form.type_requette}}
                     <div id="step1-error" class="error"></div>
                 </div>
                 <div class="form-group">
     
-                    <label for="services_impacte">Service Impacté</label>
+                    <label for="services_impacte">Service</label>
                     {{ form.services_impacte }}
                     <div id="step1-error" class="error"></div>
                 </div>
                 <div class="form-group">
-                    <label for="description">Description</label>
+                    <label for="description">comment</label>
                     {{ form.description }}
                     <div id="step1-error" class="error"></div>
                 </div>
-                <button type="button" onclick="nextStep()">Suivant</button>
+                <button type="button" onclick="nextStep()">Next</button>
             </div>
             
             <!-- Étape 2 -->
@@ -56,18 +56,25 @@
                     {% comment %} <div id="step2-error" class="error"></div>
                 </div> {% endcomment %}
                 <div class="form-group">
-                    <label for="destinataires" >entrer email du nouveau destinataire</label>
+                    <label for="destinataires" >enter email of new recipient</label>
                     {{ form.destinataire_nouveau }}
                     {% comment %} <input type="email" id="destinataires" placeholder="Entrer les destinataire" name="destinataires" required> {% endcomment %}
                     <div id="step2-error" class="error"></div>
                 </div>
                 <div class="form-group">
-                    <label for="statut">Statut</label>
+                    <label for="date_envoie">date of sending</label>
+                    {{ form.date_envoie }}
+                    <div id="step2-error" class="error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="statut">Status</label>
                     {{ form.statut }}
                     <div id="step2-error" class="error"></div>
                 </div>
-                <button type="button" onclick="prevStep()">Précédent</button>
-                <button type="submit">Soumettre</button>
+                
+                
+                <button type="button" onclick="prevStep()">Previous</button>
+                <button type="submit">Submit</button>
             </div>
         </form>
     </div>
