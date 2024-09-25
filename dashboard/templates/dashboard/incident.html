@@ -22,6 +22,129 @@
             <!-- Étape 1 -->
             <div class="step active" id="step1">
                 <div class="form-group">
+                    <label for="numero_ticket">Number ticket</label>
+                    {{ form.numero_ticket }}
+                    <div id="step1-error" class="error">{{ form.numero_ticket.errors|join:", " }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="type_requette">Incident type</label>
+                    {{ form.type_requette }}
+                    <div id="step1-error" class="error">{{ form.type_requette.errors|join:", " }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="services_impacte">Service</label>
+                    {{ form.services_impacte }}
+                    <div id="step1-error" class="error">{{ form.services_impacte.errors|join:", " }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="description">Comment</label>
+                    {{ form.description }}
+                    <div id="step1-error" class="error">{{ form.description.errors|join:", " }}</div>
+                </div>
+                <button type="button" onclick="nextStep()">Next</button>
+            </div>
+            
+            <!-- Étape 2 -->
+            <div class="step" id="step2">
+                <div class="form-group">
+                    <label for="destinataires">Enter email of new recipient</label>
+                    {{ form.destinataire_nouveau }}
+                    <div id="step2-error" class="error">{{ form.destinataire_nouveau.errors|join:", " }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="date_envoie">Date of sending</label>
+                    {{ form.date_envoie }}
+                    <div id="step2-error" class="error">{{ form.date_envoie.errors|join:", " }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="statut">Status</label>
+                    {{ form.statut }}
+                    <div id="step2-error" class="error">{{ form.statut.errors|join:", " }}</div>
+                </div>
+                
+                <button type="button" onclick="prevStep()">Previous</button>
+                <button type="submit">Submit</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const steps = document.querySelectorAll('.step');
+        
+        function showStep(step) {
+            steps.forEach((element, index) => {
+                element.classList.toggle('active', index + 1 === step);
+            });
+        }
+
+        function validateStep(step) {
+            let isValid = true;
+            const fields = steps[step - 1].querySelectorAll('input, select, textarea');
+            const errorDiv = document.querySelector(`#step${step}-error`);
+            errorDiv.textContent = '';
+
+            fields.forEach(field => {
+                if (field.required && !field.value.trim()) {
+                    errorDiv.textContent += `Le champ ${field.previousElementSibling.textContent} est obligatoire. `;
+                    isValid = false;
+                }
+            });
+
+            return isValid;
+        }
+
+        function nextStep() {
+            if (validateStep(currentStep)) {
+                if (currentStep < steps.length) {
+                    currentStep++;
+                    showStep(currentStep);
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            showStep(currentStep);
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+{% comment %} <!DOCTYPE html>
+{% load static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{% static 'css/incident.css' %}" rel="stylesheet">
+    <title>Incident</title>
+    <style>
+        .step { display: none; }
+        .step.active { display: block; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Notifier incident</h2>
+        <form id="changeForm" method="post">
+            {% csrf_token %}
+            
+            <!-- Étape 1 -->
+            <div class="step active" id="step1">
+                <div class="form-group">
     
                     <label for="numero_ticket">number ticket</label>
                     {{ form.numero_ticket  }}
@@ -55,11 +178,11 @@
                     {% comment %} <input type="email" id="destinataires" placeholder="Entrer les destinataire" name="destinataires" required> {% endcomment %}
                     {% comment %} <div id="step2-error" class="error"></div>
                 </div> {% endcomment %}
-                <div class="form-group">
+                {% comment %} <div class="form-group">
                     <label for="destinataires" >enter email of new recipient</label>
-                    {{ form.destinataire_nouveau }}
+                    {{ form.destinataire_nouveau }} {% endcomment %}
                     {% comment %} <input type="email" id="destinataires" placeholder="Entrer les destinataire" name="destinataires" required> {% endcomment %}
-                    <div id="step2-error" class="error"></div>
+                    {% comment %} <div id="step2-error" class="error"></div>
                 </div>
                 <div class="form-group">
                     <label for="date_envoie">date of sending</label>
@@ -126,4 +249,4 @@
         });
     </script>
 </body>
-</html>
+</html> {% endcomment %} 

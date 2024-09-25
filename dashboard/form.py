@@ -3,14 +3,15 @@ from django import forms
 from .models import Incident, Destinataire, Changement,Service
 from .models import  Type_requette_changemen
 
-# class IncidentForm(forms.ModelForm):
+
+
 
 class IncidentForm(forms.ModelForm):
     class Meta:
         model = Incident
         fields = ['services_impacte', 'description', 'destinataire_nouveau', 'date_envoie', 'statut', 'type_requette', 'numero_ticket']
         widgets = {
-            'services_impacte': forms.TextInput(attrs={'class': 'form-control'}),
+            'services_impacte': forms.Select(attrs={'class': 'form-control'}),  # Correction: Utilisation d'un Select
             'description': forms.Textarea(attrs={'class': 'form-control'}),
             'date_envoie': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
             'statut': forms.Select(attrs={'class': 'form-control'}),
@@ -20,8 +21,19 @@ class IncidentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # Correction pour services_impacte : queryset pour récupérer les services disponibles
+        self.fields['services_impacte'].queryset = Service.objects.all()
+        
+        # Gestion du champ destinataires (si utilisé)
         if 'destinataires' in self.fields:
-            self.fields['destinataires'].queryset = Destinataire.objects.all()    # class Meta:
+            self.fields['destinataires'].queryset = Destinataire.objects.all()
+
+
+# class IncidentForm(forms.ModelForm):
+
+
+   # class Meta:
     #     model = Incident
     #     fields = ['services_impacte', 'description','destinataire','destinataire_nouveau','date_envoie', 'statut','Type_requette_id','Numero_ticket','destinataires']
     #     widgets = {
@@ -60,15 +72,15 @@ class ChangementForm(forms.ModelForm):
             'statut', 'Type_requette_changement', 'Numero_ticket', 'heure_debut', 'heure_fin'
         ]
         widgets = {
-            'services_impacte': forms.Select(attrs={}),
-            'date_changement': forms.DateTimeInput(attrs={ 'type': 'datetime-local'}),
+            'services_impacte': forms.Select(attrs={'class': 'form-control'}),
+            'date_changement': forms.DateTimeInput(attrs={ 'type':  'datetime-local'}),
             'fin_changement': forms.DateTimeInput(attrs={ 'type': 'datetime-local'}),
             'date_envoie': forms.DateTimeInput(attrs={ 'type': 'datetime-local'}),
-            'description': forms.Textarea(attrs={}),
+            'description': forms.Textarea(attrs={'class': 'form-control'}),
             'heure_debut': forms.TimeInput(format='%H:%M', attrs={ 'type': 'time'}),
             'heure_fin': forms.TimeInput(format='%H:%M', attrs={'type': 'time'}),
-            'statut': forms.Select(attrs={}),
-            'Type_requette_changement': forms.Select(attrs={}),
+            'statut': forms.Select(attrs={'class': 'form-control'}),
+            'Type_requette_changement': forms.Select(attrs={'class': 'form-control'}),
         }
 
     def __init__(self, *args, **kwargs):

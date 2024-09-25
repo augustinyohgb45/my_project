@@ -32,6 +32,8 @@ def acceuil(request):
     
     return render(request, 'dashboard/index.html', context)
 
+
+
 @login_required
 def incident(request):
     if request.method == "POST":
@@ -39,9 +41,11 @@ def incident(request):
         print("++++++++++++++++++++++++++++++++")
         if form.is_valid():
             print("=========================")
+
             incident = form.save(commit=False)
             incident.user = request.user
             incident.save()
+            form.save_m2m()  # Sauvegarder les relations many-to-many
             
             # Collecter les emails des destinataires
             emails = []
@@ -58,18 +62,13 @@ def incident(request):
             email_status = send_email_if_due(curent_date, date_envoie, subject, message, emails)
                         
             # URL de l'image
-            
             image_url = "https://www.mtn.co.ug/wp-content/uploads/sites/7/2023/02/Logo-cobranding_Artboard-3.jpg"
-            # image_url2 = "https://attachments.office.net/owa/Yoh.Gbetibouo%40mtn.com/service.svc/s/GetAttachmentThumbnail?id=AAMkADA2ODYzZTFkLTExMjktNDFlNC05MTIyLTA4NmRmNzdmMmZkYwBGAAAAAABJi%2FG7cwEeRqmru44PYNQhBwAK8QQnPWhTT6hQhIhzzm0qAAAAAAEMAAAK8QQnPWhTT6hQhIhzzm0qAAAykJoUAAABEgAQAL13esNbkFJDsQRV%2BdXhQs0%3D&thumbnailType=2&token=eyJhbGciOiJSUzI1NiIsImtpZCI6IkU1RDJGMEY4REE5M0I2NzA5QzQzQTlFOEE2MTQzQzAzRDYyRjlBODAiLCJ0eXAiOiJKV1QiLCJ4NXQiOiI1ZEx3LU5xVHRuQ2NRNm5vcGhROEE5WXZtb0EifQ.eyJvcmlnaW4iOiJodHRwczovL291dGxvb2sub2ZmaWNlLmNvbSIsInVjIjoiZjQ1ZThhY2U1MDVkNDA2MDk2ZTFkNTVjOWNhNmQ2NzkiLCJzaWduaW5fc3RhdGUiOiJrbXNpIiwidmVyIjoiRXhjaGFuZ2UuQ2FsbGJhY2suVjEiLCJhcHBjdHhzZW5kZXIiOiJPd2FEb3dubG9hZEBjOWI5Y2I1MC0zNjQ0LTRkYjQtYTI2Ny1mYTg0ZGYyZjRjZWIiLCJpc3NyaW5nIjoiV1ciLCJhcHBjdHgiOiJ7XCJtc2V4Y2hwcm90XCI6XCJvd2FcIixcInB1aWRcIjpcIjExNTM4MDExMjkyNjc4MzMyNjNcIixcInNjb3BlXCI6XCJPd2FEb3dubG9hZFwiLFwib2lkXCI6XCI1Y2I0ODAyYy00MGUyLTQzMjItODM4OC00ZTZmYzcyMDFkYjNcIixcInByaW1hcnlzaWRcIjpcIlMtMS01LTIxLTI0Mjc1MTU1NDktODQ0ODgzODgtMzY5OTAxNTgzNy00NDczMDkxNFwifSIsIm5iZiI6MTcyNTAyNDIzNSwiZXhwIjoxNzI1MDI0NTM1LCJpc3MiOiIwMDAwMDAwMi0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDBAYzliOWNiNTAtMzY0NC00ZGI0LWEyNjctZmE4NGRmMmY0Y2ViIiwiYXVkIjoiMDAwMDAwMDItMDAwMC0wZmYxLWNlMDAtMDAwMDAwMDAwMDAwL2F0dGFjaG1lbnRzLm9mZmljZS5uZXRAYzliOWNiNTAtMzY0NC00ZGI0LWEyNjctZmE4NGRmMmY0Y2ViIiwiaGFwcCI6Im93YSJ9.UT2dgdK5DKl-MtpxubyNWe0bpJXE3xXa5w-h_HIdEcfothkj1DU6iCZFS6tNrrp4o2Je4lZ2Nd1CSUPgUdvHnnsTdbr9fKRNTXPSgOtEnYMXKm1lcH56UEhB9WrXkzY6UTiPOPMtsZasb1Ek9raGtwvoX_OTZHii9n8GWOqZg2JILf-UdsiTAtK_OomIHCRLs9H_7VqAUM6Ri9X8fwDNOS44s28WXpIjny-J58Orf2TRQf4Bmrw9SrFE5Mk3-ojAujJO2ASTORArnbyUFmdGCZjL8RHKCQlX9p6j9vMvD-TEgqfdyYNeKTHVgs9C_7rVblDMuhjfZf3gRmQnhNuX8A&X-OWA-CANARY=bdvoV20F57YAAAAAAAAAAMAI9RX3yNwYfcACiODr9TiUZjHaTnPEP_m_1dvZ64xXSL5uEZe4288.&owa=outlook.office.com&scriptVer=20240816003.15&clientId=7F90C63FA8F24489B8ECA1D98477B826&animation=true"
-            if incident.Type_requette_id.Nom_requette == 'indisponibilite':
-                # requete = Type_requette.objects.get(Nom_requette = 'indisponibilite')
-                # image1 = f'../../media/{requete.image1}'
-                # image2 = f'../../media/{requete.image2}' 
+            
+            if incident.type_requette.nom_requette == 'indisponibilite':
                 emails.append('julienkadjakassi@gmail.com')
                 message = f"""
                 <html>
                     <body>
-                        <!-- Image en haut -->
                         <div style="text-align: center;">
                             <img src="{image_url}" alt="Image en haut" style="width: 100%; height: auto;">
                         </div>
@@ -77,19 +76,17 @@ def incident(request):
                         <p style="color: blue;">Nous observons une indisponibilité du service {services_impacte} depuis {date_incident}. Les équipes sont mobilisées pour le rétablissement des services dans les plus brefs délais.</p>
                         <p style="color: blue;">Merci pour votre compréhension.</p>
                         <p style="color: blue;">LA DSI</p>
-                        <!-- Image en bas -->
                         <div style="text-align: center;">
                             <img src="{image_url}" alt="Image en bas" style="width: 100%; height: auto;">
                         </div>
                     </body>
                 </html>
                 """
-            elif incident.Type_requette_id.Nom_requette == 'instabilite':
+            elif incident.type_requette.nom_requette == 'instabilite':
                 emails.append('gerardyeboua35@gmail.com')
                 message = f"""
                 <html>
                     <body>
-                        <!-- Image en haut -->
                         <div style="text-align: center;">
                             <img src="{image_url}" alt="Image en haut" style="width: 100%; height: auto;">
                         </div>
@@ -97,7 +94,6 @@ def incident(request):
                         <p style="color: blue;">Nous observons une perturbation du service {services_impacte} depuis {date_incident}. Les équipes sont mobilisées pour le rétablissement des services dans les plus brefs délais.</p>
                         <p style="color: blue;">Merci pour votre compréhension.</p>
                         <p style="color: blue;">IT-MFS</p>
-                        <!-- Image en bas -->
                         <div style="text-align: center;">
                             <img src="{image_url}" alt="Image en bas" style="width: 100%; height: auto;">
                         </div>
@@ -111,13 +107,107 @@ def incident(request):
                 email.attach_alternative(message, "text/html")
                 email.send()
             except Exception as e:
-                logger.error(f'Error sending email: {e}')
+                logger.error(f'Erreur lors de l\'envoi de l\'email : {e}')
                 
-            return redirect("acceuil")  
+            # Redirection après la soumission réussie du formulaire
+            print("Redirection vers la page d'accueil...")
+            return redirect("acceuil")
+        else:
+            print("Erreurs du formulaire :", form.errors)  # Afficher les erreurs du formulaire
     else:
         form = IncidentForm()
 
     return render(request, 'dashboard/incident.html', {'form': form})
+
+
+# @login_required
+# def incident(request):
+#     if request.method == "POST":
+#         form = IncidentForm(request.POST)
+#         print("++++++++++++++++++++++++++++++++")
+#         if form.is_valid():
+#             print("=========================")
+        
+#             incident = form.save(commit=False)
+#             incident.user = request.user
+#             incident.save()
+#             form.save_m2m() # pour manytomany
+            
+#             # Collecter les emails des destinataires
+#             emails = []
+#             if incident.destinataire_nouveau:
+#                 emails.append(incident.destinataire_nouveau)
+
+#             services_impacte = incident.services_impacte
+#             date_incident = incident.date_enregistrement.strftime("%d/%m/%Y")
+            
+#             curent_date = incident.date_enregistrement
+#             date_envoie = incident.date_envoie
+#             subject = 'Notification Incident'
+#             message = ''
+#             email_status = send_email_if_due(curent_date, date_envoie, subject, message, emails)
+                        
+#             # URL de l'image
+            
+#             image_url = "https://www.mtn.co.ug/wp-content/uploads/sites/7/2023/02/Logo-cobranding_Artboard-3.jpg"
+#             # image_url2 = "https://attachments.office.net/owa/Yoh.Gbetibouo%40mtn.com/service.svc/s/GetAttachmentThumbnail?id=AAMkADA2ODYzZTFkLTExMjktNDFlNC05MTIyLTA4NmRmNzdmMmZkYwBGAAAAAABJi%2FG7cwEeRqmru44PYNQhBwAK8QQnPWhTT6hQhIhzzm0qAAAAAAEMAAAK8QQnPWhTT6hQhIhzzm0qAAAykJoUAAABEgAQAL13esNbkFJDsQRV%2BdXhQs0%3D&thumbnailType=2&token=eyJhbGciOiJSUzI1NiIsImtpZCI6IkU1RDJGMEY4REE5M0I2NzA5QzQzQTlFOEE2MTQzQzAzRDYyRjlBODAiLCJ0eXAiOiJKV1QiLCJ4NXQiOiI1ZEx3LU5xVHRuQ2NRNm5vcGhROEE5WXZtb0EifQ.eyJvcmlnaW4iOiJodHRwczovL291dGxvb2sub2ZmaWNlLmNvbSIsInVjIjoiZjQ1ZThhY2U1MDVkNDA2MDk2ZTFkNTVjOWNhNmQ2NzkiLCJzaWduaW5fc3RhdGUiOiJrbXNpIiwidmVyIjoiRXhjaGFuZ2UuQ2FsbGJhY2suVjEiLCJhcHBjdHhzZW5kZXIiOiJPd2FEb3dubG9hZEBjOWI5Y2I1MC0zNjQ0LTRkYjQtYTI2Ny1mYTg0ZGYyZjRjZWIiLCJpc3NyaW5nIjoiV1ciLCJhcHBjdHgiOiJ7XCJtc2V4Y2hwcm90XCI6XCJvd2FcIixcInB1aWRcIjpcIjExNTM4MDExMjkyNjc4MzMyNjNcIixcInNjb3BlXCI6XCJPd2FEb3dubG9hZFwiLFwib2lkXCI6XCI1Y2I0ODAyYy00MGUyLTQzMjItODM4OC00ZTZmYzcyMDFkYjNcIixcInByaW1hcnlzaWRcIjpcIlMtMS01LTIxLTI0Mjc1MTU1NDktODQ0ODgzODgtMzY5OTAxNTgzNy00NDczMDkxNFwifSIsIm5iZiI6MTcyNTAyNDIzNSwiZXhwIjoxNzI1MDI0NTM1LCJpc3MiOiIwMDAwMDAwMi0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDBAYzliOWNiNTAtMzY0NC00ZGI0LWEyNjctZmE4NGRmMmY0Y2ViIiwiYXVkIjoiMDAwMDAwMDItMDAwMC0wZmYxLWNlMDAtMDAwMDAwMDAwMDAwL2F0dGFjaG1lbnRzLm9mZmljZS5uZXRAYzliOWNiNTAtMzY0NC00ZGI0LWEyNjctZmE4NGRmMmY0Y2ViIiwiaGFwcCI6Im93YSJ9.UT2dgdK5DKl-MtpxubyNWe0bpJXE3xXa5w-h_HIdEcfothkj1DU6iCZFS6tNrrp4o2Je4lZ2Nd1CSUPgUdvHnnsTdbr9fKRNTXPSgOtEnYMXKm1lcH56UEhB9WrXkzY6UTiPOPMtsZasb1Ek9raGtwvoX_OTZHii9n8GWOqZg2JILf-UdsiTAtK_OomIHCRLs9H_7VqAUM6Ri9X8fwDNOS44s28WXpIjny-J58Orf2TRQf4Bmrw9SrFE5Mk3-ojAujJO2ASTORArnbyUFmdGCZjL8RHKCQlX9p6j9vMvD-TEgqfdyYNeKTHVgs9C_7rVblDMuhjfZf3gRmQnhNuX8A&X-OWA-CANARY=bdvoV20F57YAAAAAAAAAAMAI9RX3yNwYfcACiODr9TiUZjHaTnPEP_m_1dvZ64xXSL5uEZe4288.&owa=outlook.office.com&scriptVer=20240816003.15&clientId=7F90C63FA8F24489B8ECA1D98477B826&animation=true"
+#             if incident.Type_requette_id.Nom_requette == 'indisponibilite':
+#                 # requete = Type_requette.objects.get(Nom_requette = 'indisponibilite')
+#                 # image1 = f'../../media/{requete.image1}'
+#                 # image2 = f'../../media/{requete.image2}' 
+#                 emails.append('julienkadjakassi@gmail.com')
+#                 message = f"""
+#                 <html>
+#                     <body>
+#                         <!-- Image en haut -->
+#                         <div style="text-align: center;">
+#                             <img src="{image_url}" alt="Image en haut" style="width: 100%; height: auto;">
+#                         </div>
+#                         <p style="color: blue;">Y’ello MTNers,</P>
+#                         <p style="color: blue;">Nous observons une indisponibilité du service {services_impacte} depuis {date_incident}. Les équipes sont mobilisées pour le rétablissement des services dans les plus brefs délais.</p>
+#                         <p style="color: blue;">Merci pour votre compréhension.</p>
+#                         <p style="color: blue;">LA DSI</p>
+#                         <!-- Image en bas -->
+#                         <div style="text-align: center;">
+#                             <img src="{image_url}" alt="Image en bas" style="width: 100%; height: auto;">
+#                         </div>
+#                     </body>
+#                 </html>
+#                 """
+#             elif incident.Type_requette_id.Nom_requette == 'instabilite':
+#                 emails.append('gerardyeboua35@gmail.com')
+#                 message = f"""
+#                 <html>
+#                     <body>
+#                         <!-- Image en haut -->
+#                         <div style="text-align: center;">
+#                             <img src="{image_url}" alt="Image en haut" style="width: 100%; height: auto;">
+#                         </div>
+#                         <p style="color: blue;">Y’ello MTNers,</p>
+#                         <p style="color: blue;">Nous observons une perturbation du service {services_impacte} depuis {date_incident}. Les équipes sont mobilisées pour le rétablissement des services dans les plus brefs délais.</p>
+#                         <p style="color: blue;">Merci pour votre compréhension.</p>
+#                         <p style="color: blue;">IT-MFS</p>
+#                         <!-- Image en bas -->
+#                         <div style="text-align: center;">
+#                             <img src="{image_url}" alt="Image en bas" style="width: 100%; height: auto;">
+#                         </div>
+#                     </body>
+#                 </html>
+#                 """
+            
+#             # Envoi de l'email avec rendu HTML
+#             try:
+#                 email = EmailMultiAlternatives(subject, '', to=emails)
+#                 email.attach_alternative(message, "text/html")
+#                 email.send()
+#             except Exception as e:
+#                 logger.error(f'Error sending email: {e}')
+                
+#             return redirect("acceuil")  
+#     else:
+#         form = IncidentForm()
+
+#     return render(request, 'dashboard/incident.html', {'form': form})
 
 def changement(request):
     form = ChangementForm()
@@ -310,7 +400,7 @@ def action_statut(request, incident_id):
         # URL de l'image
         image_url = "https://www.mtn.co.ug/wp-content/uploads/sites/7/2023/02/Logo-cobranding_Artboard-3.jpg"        
         # image_url2 = "https://attachments.office.net/owa/Yoh.Gbetibouo%40mtn.com/service.svc/s/GetAttachmentThumbnail?id=AAMkADA2ODYzZTFkLTExMjktNDFlNC05MTIyLTA4NmRmNzdmMmZkYwBGAAAAAABJi%2FG7cwEeRqmru44PYNQhBwAK8QQnPWhTT6hQhIhzzm0qAAAAAAEMAAAK8QQnPWhTT6hQhIhzzm0qAAAykJoUAAABEgAQAL13esNbkFJDsQRV%2BdXhQs0%3D&thumbnailType=2&token=eyJhbGciOiJSUzI1NiIsImtpZCI6IkU1RDJGMEY4REE5M0I2NzA5QzQzQTlFOEE2MTQzQzAzRDYyRjlBODAiLCJ0eXAiOiJKV1QiLCJ4NXQiOiI1ZEx3LU5xVHRuQ2NRNm5vcGhROEE5WXZtb0EifQ.eyJvcmlnaW4iOiJodHRwczovL291dGxvb2sub2ZmaWNlLmNvbSIsInVjIjoiZjQ1ZThhY2U1MDVkNDA2MDk2ZTFkNTVjOWNhNmQ2NzkiLCJzaWduaW5fc3RhdGUiOiJrbXNpIiwidmVyIjoiRXhjaGFuZ2UuQ2FsbGJhY2suVjEiLCJhcHBjdHhzZW5kZXIiOiJPd2FEb3dubG9hZEBjOWI5Y2I1MC0zNjQ0LTRkYjQtYTI2Ny1mYTg0ZGYyZjRjZWIiLCJpc3NyaW5nIjoiV1ciLCJhcHBjdHgiOiJ7XCJtc2V4Y2hwcm90XCI6XCJvd2FcIixcInB1aWRcIjpcIjExNTM4MDExMjkyNjc4MzMyNjNcIixcInNjb3BlXCI6XCJPd2FEb3dubG9hZFwiLFwib2lkXCI6XCI1Y2I0ODAyYy00MGUyLTQzMjItODM4OC00ZTZmYzcyMDFkYjNcIixcInByaW1hcnlzaWRcIjpcIlMtMS01LTIxLTI0Mjc1MTU1NDktODQ0ODgzODgtMzY5OTAxNTgzNy00NDczMDkxNFwifSIsIm5iZiI6MTcyNTAyNDIzNSwiZXhwIjoxNzI1MDI0NTM1LCJpc3MiOiIwMDAwMDAwMi0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDBAYzliOWNiNTAtMzY0NC00ZGI0LWEyNjctZmE4NGRmMmY0Y2ViIiwiYXVkIjoiMDAwMDAwMDItMDAwMC0wZmYxLWNlMDAtMDAwMDAwMDAwMDAwL2F0dGFjaG1lbnRzLm9mZmljZS5uZXRAYzliOWNiNTAtMzY0NC00ZGI0LWEyNjctZmE4NGRmMmY0Y2ViIiwiaGFwcCI6Im93YSJ9.UT2dgdK5DKl-MtpxubyNWe0bpJXE3xXa5w-h_HIdEcfothkj1DU6iCZFS6tNrrp4o2Je4lZ2Nd1CSUPgUdvHnnsTdbr9fKRNTXPSgOtEnYMXKm1lcH56UEhB9WrXkzY6UTiPOPMtsZasb1Ek9raGtwvoX_OTZHii9n8GWOqZg2JILf-UdsiTAtK_OomIHCRLs9H_7VqAUM6Ri9X8fwDNOS44s28WXpIjny-J58Orf2TRQf4Bmrw9SrFE5Mk3-ojAujJO2ASTORArnbyUFmdGCZjL8RHKCQlX9p6j9vMvD-TEgqfdyYNeKTHVgs9C_7rVblDMuhjfZf3gRmQnhNuX8A&X-OWA-CANARY=bdvoV20F57YAAAAAAAAAAMAI9RX3yNwYfcACiODr9TiUZjHaTnPEP_m_1dvZ64xXSL5uEZe4288.&owa=outlook.office.com&scriptVer=20240816003.15&clientId=7F90C63FA8F24489B8ECA1D98477B826&animation=true"
-        if incident.Type_requette_id.Nom_requette == 'indisponibilite':       
+        if incident.type_requette.nom_requette == 'indisponibilite':       
             message = f"""
            <html>
                 <body>
@@ -328,7 +418,7 @@ def action_statut(request, incident_id):
                 </body>
             </html>
             """
-        elif incident.Type_requette_id.Nom_requette == 'instabilite':
+        elif incident.type_requette.nom_requette == 'instabilite':
             message = f"""
             <html>
                 <body>
