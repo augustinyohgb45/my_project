@@ -1,0 +1,32 @@
+<html>
+    <body>
+        <div style="text-align: center;">
+            <img src="{{ image_url }}" alt="Image en haut" style="width: 100%; height: auto;">
+        </div>
+        <p style="color: blue;">Y’ello MTNers,</p>
+        {% if resolu %}
+            {% if type_incident == 'indisponibilite' %}
+        <p style="color: blue;">L'indisponibilité survenue sur le service {{ service }} depuis {{ date_incident }} est résolue.</p>
+            {% else %}
+        <p style="color: blue;">La perturbation survenue sur le service {{ service }} depuis {{ date_incident }} est résolue.</p>
+            {% endif %}
+        <p style="color: blue;">Merci pour votre compréhension.</p>
+            {% if type_incident == 'instabilite' %}
+        <p style="color: blue;">IT-MFS</p>
+            {% endif %}
+        {% else %}
+            {% if type_incident == 'indisponibilite' %}
+        <p style="color: blue;">Nous observons une indisponibilité du service {{ service }} depuis {{ date_incident }}. Les équipes sont mobilisées pour le rétablissement des services dans les plus brefs délais.</p>
+        <p style="color: blue;">Merci pour votre compréhension.</p>
+        <p style="color: blue;">LA DSI</p>
+            {% else %}
+        <p style="color: blue;">Nous observons une perturbation du service {{ service }} depuis {{ date_incident }}. Les équipes sont mobilisées pour le rétablissement des services dans les plus brefs délais.</p>
+        <p style="color: blue;">Merci pour votre compréhension.</p>
+        <p style="color: blue;">IT-MFS</p>
+            {% endif %}
+        {% endif %}
+        <div style="text-align: center;">
+            <img src="{{ image_url }}" alt="Image en bas" style="width: 100%; height: auto;">
+        </div>
+    </body>
+</html>

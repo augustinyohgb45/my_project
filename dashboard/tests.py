@@ -98,3 +98,91 @@ class EmailIncidentTests(TestCase):
         self.poster_incident('autre')
         self.assertEqual(Incident.objects.count(), 1)
         self.assertEqual(len(mail.outbox), 0)
+
+
+class AjoutServiceEtTypeTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('testeur', password='motdepasse-test')
+        self.client.force_login(self.user)
+
+    def donnees(self, **valeurs):
+        maintenant = timezone.localtime()
+        donnees = {
+            'Numero_ticket': 'CHG002',
+            'services_impacte': '',
+            'nouveau_service': 'Orange Money',
+            'Type_requette_changement': '',
+            'nouveau_type': 'Migration réseau',
+            'date_changement': maintenant.strftime('%Y-%m-%dT%H:%M'),
+            'fin_changement': (maintenant + timedelta(hours=2)).strftime('%Y-%m-%dT%H:%M'),
+            'heure_debut': '22:00',
+            'heure_fin': '23:00',
+            'date_envoie': (maintenant - timedelta(minutes=5)).strftime('%Y-%m-%dT%H:%M'),
+            'description': 'Test',
+            'nom_plateforme': 'MoMo',
+            'destinataire_nouveau': 'equipe@example.com',
+            'statut': 'E',
+        }
+        donnees.update(valeurs)
+        return donnees
+
+    def test_cree_le_nouveau_service_et_le_nouveau_type(self):
+        reponse = self.client.post(reverse('changement'), self.donnees())
+        self.assertRedirects(reponse, reverse('acceuil'))
+        changement = Changement.objects.get()
+        self.assertEqual(changement.services_impacte.nom, 'Orange Money')
+        self.assertEqual(changement.Type_requette_changement.nom_requette_changement, 'Migration réseau')
+        # Le message par défaut du nouveau type est utilisé, balises remplacées
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('Orange Money', mail.outbox[0].body)
+        self.assertNotIn('<', mail.outbox[0].body)
+
+    def test_nouveau_type_sans_destinataire_refuse(self):
+        reponse = self.client.post(reverse('changement'), self.donnees(destinataire_nouveau=''))
+        self.assertEqual(reponse.status_code, 200)
+        self.assertContains(reponse, "aucun destinataire")
+        self.assertEqual(Changement.objects.count(), 0)
+        self.assertEqual(Service.objects.count(), 0)
+        self.assertEqual(Type_requette_changemen.objects.count(), 0)
+
+    def test_service_obligatoire(self):
+        reponse = self.client.post(reverse('changement'), self.donnees(nouveau_service=''))
+        self.assertEqual(reponse.status_code, 200)
+        self.assertEqual(Changement.objects.count(), 0)
+
+
+class PagesTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('testeur', password='motdepasse-test')
+        self.client.force_login(self.user)
+        service = Service.objects.create(nom='Mobile Money')
+        type_incident = Type_requette.objects.create(nom_requette='indisponibilite')
+        self.incident = Incident.objects.create(
+            numero_ticket='INC001', services_impacte=service, type_requette=type_incident,
+            date_envoie=timezone.now(), description='Panne', user=self.user,
+        )
+
+    def test_pages_du_tableau_de_bord(self):
+        for nom in ('acceuil', 'listeincident', 'listechangement', 'incident', 'changement'):
+            with self.subTest(page=nom):
+                self.assertEqual(self.client.get(reverse(nom)).status_code, 200)
+
+    def test_liste_affiche_le_type_d_incident(self):
+        self.assertContains(self.client.get(reverse('listeincident')), '<td>indisponibilite</td>', html=True)
+
+    def test_graphique_compte_l_incident_du_mois(self):
+        graphique = self.client.get(reverse('acceuil')).context['graphique']
+        self.assertEqual(len(graphique['mois']), 12)
+        self.assertEqual(graphique['incidents'][-1], 1)
+
+    def test_cloture_par_get_refusee(self):
+        reponse = self.client.get(reverse('action_statut', args=[self.incident.id]))
+        self.assertEqual(reponse.status_code, 405)
+        self.incident.refresh_from_db()
+        self.assertTrue(self.incident.en_cours)
+
+    def test_cloture_met_a_jour_en_cours(self):
+        self.client.post(reverse('action_statut', args=[self.incident.id]))
+        self.incident.refresh_from_db()
+        self.assertEqual(self.incident.statut, 'C')
+        self.assertFalse(self.incident.en_cours)

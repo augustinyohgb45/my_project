@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from django.contrib.messages import constants as messages
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -64,18 +65,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'app_mfs.wsgi.application'
 
-try:
-    from django.contrib.messages import constants as messages
-
-    MESSAGE_TAGS = {
-        messages.DEBUG: "alert-info",
-        messages.INFO: "alert-info",
-        messages.SUCCESS: "alert-success",
-        messages.WARNING: "alert-warning",
-        messages.ERROR: "alert-danger",
-    }
-except Exception as e:
-    pass
+MESSAGE_TAGS = {
+    messages.DEBUG: "alert-info",
+    messages.INFO: "alert-info",
+    messages.SUCCESS: "alert-success",
+    messages.WARNING: "alert-warning",
+    messages.ERROR: "alert-danger",
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -124,7 +120,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'fr-fr'
 
 TIME_ZONE = 'UTC'
 
@@ -137,9 +133,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "dashboard/static"),
-]
 
 STATIC_URL="static/"
 MEDIA_URL = "/media/"

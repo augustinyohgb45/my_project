@@ -5,120 +5,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{% static 'css/incident.css' %}" rel="stylesheet">
-    {% comment %} <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"> {% endcomment %}
     <title>Changement</title>
     <style>
         .step { display: none; }
         .step.active { display: block; }
         .error { color: red; }
-        #new-type-container, #new-service-container { display: none; }
+        .nouveau { display: none; }
+        .nouveau.visible { display: block; }
     </style>
 </head>
 <body>
-    <!-- Button trigger modal -->
-<!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-    Launch demo modal
-  </button>
-   -->
-  <!-- Modal -->
-  {% comment %} <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form action="" method="post">
-            <input type="text" placeholder="nom de la requette">
-            <input type="text" placeholder="nom du desti">
-            <input type="email" placeholder="email du desti">
-            <input type="text" placeholder="contact du destinataire">
-            <textarea name="" id="" placeholder="message"></textarea>
-            
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" >Save changes</button>
-        </div>
-      </div>
-    </div>
-  </div> {% endcomment %}
-    <div class="container"> 
+    <div class="container">
         <h2>Notify change</h2>
         {% for message in messages %}
-        <div class="alert {{ message.tags }} alert-dismissible" role="alert">
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close"> 
-            <span aria-hidden="true">&times;</span>
-          </button>
-          {{ message|safe }}
-        </div>
+        <div class="alert {{ message.tags }}" role="alert">{{ message }}</div>
         {% endfor %}
+        {% if form.errors %}
+        <div class="error">
+            <p>Le formulaire contient des erreurs :</p>
+            <ul>
+                {% for field in form %}{% for error in field.errors %}
+                <li>{{ field.label }} : {{ error }}</li>
+                {% endfor %}{% endfor %}
+                {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+            </ul>
+        </div>
+        {% endif %}
         <form id="changeForm" method="post">
             {% csrf_token %}
-            
+
             <!-- Étape 1 -->
             <div class="step active" id="step1">
                 <div class="form-group">
-                    <label for="Numero_ticket">Ticket_number</label>
+                    <label for="{{ form.Numero_ticket.id_for_label }}">Ticket_number</label>
                     {{ form.Numero_ticket }}
                 </div>
-                
+
                 <div class="form-group">
                     <label for="services_impacte">Service</label>
-                    <select id="services_impacte" name="services_impacte" onchange="handleServiceChange()">
-                        {% for choice in form.services_impacte.field.queryset %}
-                            <option value="{{ choice.id }}">{{ choice }}</option>
+                    <select id="services_impacte" name="services_impacte" data-nouveau="new-service-container">
+                        {% for service in form.services_impacte.field.queryset %}
+                        <option value="{{ service.id }}"{% if form.services_impacte.value|stringformat:"s" == service.id|stringformat:"s" %} selected{% endif %}>{{ service }}</option>
                         {% endfor %}
-                        
+                        <option value=""{% if form.is_bound and not form.services_impacte.value %} selected{% endif %}>+ Ajouter un nouveau service</option>
                     </select>
-                    
-                </div>
-                
-                <!-- Nouveau service -->
-                <div class="form-group" id="new-service-container">
-                    <label for="new_service">New sevice</label>
-                    <input type="text" id="new_service" name="new_service" placeholder="Entrez le nouveau service">
-                </div>
-                
-                <div class="form-group">
-                    <label for="Type_requette_changement">Type of change</label>
-                    <select id="Type_requette_changement" name="Type_requette_changement" onchange="handleTypeChange()">
-                        {% for choice in form.Type_requette_changement.field.queryset %}
-                            <option value="{{ choice.id }}">{{ choice }}</option>
-                        {% endfor %}
-                        {% comment %} <option  value="add_new">Ajouter nouveau type</option> {% endcomment %}
-                    </select>
-                    {% comment %} <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal">Ajouter nouveau service</button> {% endcomment %}
                 </div>
 
-                <!-- Nouveau type de changement -->
-                <div class="form-group" id="new-type-container">
-                    <label for="new_type">Nouveau type de changement</label>
-                    <input type="text" id="new_type" name="new_type" placeholder="Entrez le nouveau type">
+                <div class="form-group nouveau" id="new-service-container">
+                    <label for="{{ form.nouveau_service.id_for_label }}">{{ form.nouveau_service.label }}</label>
+                    {{ form.nouveau_service }}
+                </div>
+
+                <div class="form-group">
+                    <label for="Type_requette_changement">Type of change</label>
+                    <select id="Type_requette_changement" name="Type_requette_changement" data-nouveau="new-type-container">
+                        {% for type in form.Type_requette_changement.field.queryset %}
+                        <option value="{{ type.id }}"{% if form.Type_requette_changement.value|stringformat:"s" == type.id|stringformat:"s" %} selected{% endif %}>{{ type }}</option>
+                        {% endfor %}
+                        <option value=""{% if form.is_bound and not form.Type_requette_changement.value %} selected{% endif %}>+ Ajouter un nouveau type</option>
+                    </select>
+                </div>
+
+                <div class="form-group nouveau" id="new-type-container">
+                    <label for="{{ form.nouveau_type.id_for_label }}">{{ form.nouveau_type.label }}</label>
+                    {{ form.nouveau_type }}
                 </div>
 
                 <button type="button" onclick="nextStep()">Next</button>
             </div>
-            
+
             <!-- Étape 2 -->
             <div class="step" id="step2">
                 <div class="form-group">
-                    <label for="date_changement">Change of date</label>
+                    <label for="{{ form.date_changement.id_for_label }}">Change of date</label>
                     {{ form.date_changement }}
                 </div>
                 <div class="form-group">
-                    <label for="fin_changement">Change of change</label>
+                    <label for="{{ form.fin_changement.id_for_label }}">Change of change</label>
                     {{ form.fin_changement }}
                 </div>
                 <div class="form-group">
-                    <label for="date_envoie">Sending date</label>
+                    <label for="{{ form.date_envoie.id_for_label }}">Sending date</label>
                     {{ form.date_envoie }}
                 </div>
-                
                 <div class="form-group">
-                    <label for="description">Comment</label>
+                    <label for="{{ form.description.id_for_label }}">Comment</label>
                     {{ form.description }}
                 </div>
                 <button type="button" onclick="prevStep()">Previous</button>
@@ -128,23 +99,23 @@
             <!-- Étape 3 -->
             <div class="step" id="step3">
                 <div class="form-group">
-                    <label for="heure_debut">Start time</label>
+                    <label for="{{ form.heure_debut.id_for_label }}">Start time</label>
                     {{ form.heure_debut }}
                 </div>
                 <div class="form-group">
-                    <label for="heure_fin">End time</label>
+                    <label for="{{ form.heure_fin.id_for_label }}">End time</label>
                     {{ form.heure_fin }}
                 </div>
                 <div class="form-group">
-                    <label for="nom_plateforme">Platform Name</label>
+                    <label for="{{ form.nom_plateforme.id_for_label }}">Platform Name</label>
                     {{ form.nom_plateforme }}
                 </div>
                 <div class="form-group">
-                    <label for="destinataire_nouveau">New Recipient</label>
+                    <label for="{{ form.destinataire_nouveau.id_for_label }}">New Recipient</label>
                     {{ form.destinataire_nouveau }}
                 </div>
                 <div class="form-group">
-                    <label for="statut">Status</label>
+                    <label for="{{ form.statut.id_for_label }}">Status</label>
                     {{ form.statut }}
                 </div>
                 <button type="button" onclick="prevStep()">Previous</button>
@@ -154,16 +125,12 @@
     </div>
 
     <script>
-        function handleTypeChange() {
-            const selectElement = document.getElementById('Type_requette_changemen');
-            const newTypeContainer = document.getElementById('new-type-container');
-            newTypeContainer.style.display = selectElement.value === 'add_new' ? 'block' : 'none';
-        }
-
-        function handleServiceChange() {
-            const selectElement = document.getElementById('services_impacte');
-            const newServiceContainer = document.getElementById('new-service-container');
-            newServiceContainer.style.display = selectElement.value === 'add_new_service' ? 'block' : 'none';
+        // Affiche le champ « nouveau » quand l'option « + Ajouter… » (valeur vide) est choisie
+        function majChampNouveau(select) {
+            const conteneur = document.getElementById(select.dataset.nouveau);
+            const visible = select.value === '';
+            conteneur.classList.toggle('visible', visible);
+            conteneur.querySelector('input').required = visible;
         }
 
         let currentStep = 1;
@@ -177,34 +144,21 @@
 
         function validateStep(step) {
             let isValid = true;
-            const fields = steps[step - 1].querySelectorAll('input, select, textarea');
-            const errorDiv = document.querySelector(`#step${step}-error`);
-
-            if (errorDiv) {
-                errorDiv.textContent = '';
-            }
-
-            fields.forEach(field => {
+            steps[step - 1].querySelectorAll('input, select, textarea').forEach(field => {
                 if (field.required && !field.value.trim()) {
                     isValid = false;
-                    if (errorDiv) {
-                        errorDiv.textContent += `Le champ "${field.previousElementSibling.textContent.trim()}" est requis. `;
-                    }
                     field.style.borderColor = 'red';
                 } else {
                     field.style.borderColor = '';
                 }
             });
-
             return isValid;
         }
 
         function nextStep() {
-            if (validateStep(currentStep)) {
-                if (currentStep < steps.length) {
-                    currentStep++;
-                    showStep(currentStep);
-                }
+            if (validateStep(currentStep) && currentStep < steps.length) {
+                currentStep++;
+                showStep(currentStep);
             }
         }
 
@@ -216,10 +170,12 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('select[data-nouveau]').forEach(select => {
+                majChampNouveau(select);
+                select.addEventListener('change', () => majChampNouveau(select));
+            });
             showStep(currentStep);
         });
     </script>
-    {% comment %} <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script> {% endcomment %}
-  
 </body>
 </html>
