@@ -15,3 +15,6 @@ staticfiles/
 
 # Secrets
 .env
+
+# Journal de la tâche planifiée
+envoi_emails.log
