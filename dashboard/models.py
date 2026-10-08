@@ -51,6 +51,7 @@ class Changement(models.Model):
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     statut = models.CharField(choices=TYPE_STATUT, default="E", max_length=12)
     en_cours = models.BooleanField(default=True)
+    email_envoye = models.BooleanField(default=False)
     Type_requette_changement = models.ForeignKey(Type_requette_changemen, on_delete=models.DO_NOTHING)
 
 class Incident(models.Model):

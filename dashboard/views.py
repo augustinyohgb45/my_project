@@ -4,8 +4,9 @@ from django.contrib import messages
 from django.utils import timezone
 from .models import *
 from .form import IncidentForm, ChangementForm
-from .utils import send_email_u , send_email_if_due
+from .utils import send_email_u, construire_email_changement, envoyer_email_changement
 import logging
+from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 # from django.http import JsonResponse
 
@@ -55,11 +56,9 @@ def incident(request):
             services_impacte = incident.services_impacte
             date_incident = incident.date_enregistrement.strftime("%d/%m/%Y")
             
-            curent_date = incident.date_enregistrement
-            date_envoie = incident.date_envoie
             subject = 'Notification Incident'
             message = ''
-            email_status = send_email_if_due(curent_date, date_envoie, subject, message, emails)
+
                         
             # URL de l'image
             image_url = "https://www.mtn.co.ug/wp-content/uploads/sites/7/2023/02/Logo-cobranding_Artboard-3.jpg"
@@ -102,12 +101,13 @@ def incident(request):
                 """
             
             # Envoi de l'email avec rendu HTML
-            try:
-                email = EmailMultiAlternatives(subject, '', to=emails)
-                email.attach_alternative(message, "text/html")
-                email.send()
-            except Exception as e:
-                logger.error(f'Erreur lors de l\'envoi de l\'email : {e}')
+            if emails and message:
+                try:
+                    email = EmailMultiAlternatives(subject, '', settings.EMAIL_HOST_USER, emails)
+                    email.attach_alternative(message, "text/html")
+                    email.send()
+                except Exception as e:
+                    logger.error(f'Erreur lors de l\'envoi de l\'email : {e}')
                 
             # Redirection après la soumission réussie du formulaire
             print("Redirection vers la page d'accueil...")
@@ -261,63 +261,26 @@ def changement(request):
                 messages.error(request, f"Erreur lors de la sauvegarde du changement : {e}")
                 return redirect("changement")
 
-            # Préparer les données pour l'email
-            nom_plateforme = changement.nom_plateforme
-            bd_plateform = f"nom_bd et {nom_plateforme}"
-            date_changement = changement.date_changement.strftime("%d/%m/%Y")
-            fin_changement = changement.fin_changement.strftime("%d/%m/%Y")
-            heure_debut = changement.heure_debut.strftime("%H:%M")
-            heure_fin = changement.heure_fin.strftime("%H:%M")
-            services_impacte = changement.services_impacte
-
-            # Type de requête choisi et ses destinataires (communs à tous les types)
-            requete = changement.Type_requette_changement
-            type_nom = requete.nom_requette_changement
-            emails = [destinataire.email for destinataire in requete.destinataires.all()]
-            message = ""
-
-            # Déterminer le message en fonction du type de requête
-            if type_nom in ('Upgrade OS NA', 'Upgrade OS Downtime', 'Upgrade BD NA'):
-                message = (
-                    requete.message.replace("< nom de la BD et plateform >", bd_plateform)
-                    .replace("< date début >", date_changement)
-                    .replace("< date fin >", fin_changement)
-                    .replace("< heure début >", heure_debut)
-                    .replace("< heure fin >", heure_fin)
-                    .replace("< nom du service >", str(services_impacte))
-                )
-            elif type_nom in ('Upgrade BD Downtime', 'Configuration Downtime', 'Maintenance planifiée Downtime'):
-                message = f"Y’ello MTNers Une opération de maintenance sur la plateforme {nom_plateforme} est prévue dans la nuit du {date_changement} au {fin_changement} de {heure_debut} à {heure_fin}. Les canaux {nom_plateforme} ci-dessous seront indisponibles de {heure_debut} à {heure_fin}. Nous excusons pour les désagréments occasionnés. IT-MFS"
-            elif type_nom == 'Configuration NA':
-                message = f"Nous effectuerons des travaux de maintenance planifiée sur {nom_plateforme}, le {date_changement} au {fin_changement}, de {heure_debut} à {heure_fin}. Pendant cet intervalle, les utilisateurs peuvent s'attendre à < impact attendu >. IT-MFS"
-            elif type_nom == 'Maintenance planifiée NA':
-                message = f"Nous effectuerons des travaux de maintenance planifiée sur {services_impacte}, le {date_changement} au {fin_changement} de {heure_debut} à {heure_fin}. Pendant cet intervalle, les utilisateurs peuvent s'attendre à < impact attendu >."
-            
-            # Vérifier si des emails sont disponibles
-            if not emails and not changement.destinataire_nouveau:
+            # Vérifier que la notification peut être construite
+            emails, message = construire_email_changement(changement)
+            if not emails:
                 messages.error(request, "Aucun destinataire n'a été trouvé pour l'envoi de l'email.")
                 return redirect("changement")
-
-            # Ajouter l'email d'un nouveau destinataire s'il est fourni
-            if changement.destinataire_nouveau:
-                emails.append(changement.destinataire_nouveau)
-
-            # Vérification de la composition du message
             if not message:
                 messages.error(request, "Aucun message n'a été généré pour le changement.")
                 return redirect("changement")
 
-            # Envoyer l'email
-            curent_date = changement.date_enregistrement
-            date_envoie = changement.date_envoie
-            subject = 'Notification Changement'
-            email_status = send_email_if_due(curent_date, date_envoie, subject, message, emails)
-            
-            if email_status:
-                messages.success(request, "L'email a été envoyé avec succès.")
+            # Envoyer maintenant si la date d'envoi est atteinte, sinon laisser
+            # la commande envoyer_emails_planifies s'en charger
+            if changement.date_envoie <= timezone.now():
+                if envoyer_email_changement(changement):
+                    messages.success(request, "L'email a été envoyé avec succès.")
+                else:
+                    messages.error(request, "Une erreur s'est produite lors de l'envoi de l'email.")
             else:
-                messages.error(request, "Une erreur s'est produite lors de l'envoi de l'email.")
-            
+                date_envoi = timezone.localtime(changement.date_envoie).strftime("%d/%m/%Y à %H:%M")
+                messages.success(request, f"L'email sera envoyé le {date_envoi}.")
+
             # Redirection après succès
             return redirect("acceuil")
     else:
@@ -410,12 +373,13 @@ def action_statut(request, incident_id):
             """
     
         # Envoi de l'email avec rendu HTML
-        try:
-            email = EmailMultiAlternatives(subject, '', to=emails)
-            email.attach_alternative(message, "text/html")
-            email.send()
-        except Exception as e:
-            logger.error(f'Error sending email: {e}')
+        if emails and message:
+            try:
+                email = EmailMultiAlternatives(subject, '', settings.EMAIL_HOST_USER, emails)
+                email.attach_alternative(message, "text/html")
+                email.send()
+            except Exception as e:
+                logger.error(f'Error sending email: {e}')
         
         
         
@@ -434,38 +398,19 @@ def action_statut_change(request, changement_id):
         changement.statut = 'C'
         changement.save()
         
-        emails = []
-        if changement.destinataire_nouveau:
-            emails.append(changement.destinataire_nouveau)
-        
+        emails, _ = construire_email_changement(changement)
+
         # Définition des variables
         nom_plateforme = changement.nom_plateforme
         date_changement = changement.date_changement.strftime("%d/%m/%Y")
         fin_changement = changement.fin_changement.strftime("%d/%m/%Y")
         heure_debut = changement.heure_debut.strftime("%H:%M")
         heure_fin = changement.heure_fin.strftime("%H:%M")
-        
+
         subject = 'Notification de mise à jour de changement'
-        message = ''
-        
-        # Accéder correctement au champ ForeignKey
-        if changement.Type_requette_changement.nom_requette_changement == 'Upgrade OS NA':
-            message = f"Yello MTNers, veuillez noter l’annulation du changement planifié sur la plateforme {nom_plateforme} du {date_changement} au {fin_changement}, de {heure_debut} à {heure_fin}. Merci pour votre compréhension. IT-MFS"
-        elif changement.Type_requette_changement.nom_requette_changement == 'Upgrade OS Downtime':
-            message = f"Yello MTNers, veuillez noter l’annulation du changement planifié sur la plateforme {nom_plateforme} du {date_changement} au {fin_changement}, de {heure_debut} à {heure_fin}. Merci pour votre compréhension. IT-MFS"
-        elif changement.Type_requette_changement.nom_requette_changement == 'Upgrade BD NA':
-            message = f"Yello MTNers, veuillez noter l’annulation du changement planifié sur la plateforme {nom_plateforme} du {date_changement} au {fin_changement}, de {heure_debut} à {heure_fin}. Merci pour votre compréhension. La DSI"
-        elif changement.Type_requette_changement.nom_requette_changement == 'Upgrade BD Downtime':
-            message = f"Yello MTNers, veuillez noter l’annulation du changement planifié sur la plateforme {nom_plateforme} du {date_changement} au {fin_changement}, de {heure_debut} à {heure_fin}. Merci pour votre compréhension. IT-MFS"
-        elif changement.Type_requette_changement.nom_requette_changement == 'Configuration NA':
-            message = f"Yello MTNers, veuillez noter l’annulation du changement planifié sur la plateforme {nom_plateforme} du {date_changement} au {fin_changement}, de {heure_debut} à {heure_fin}. Merci pour votre compréhension. IT-MFS"
-        elif changement.Type_requette_changement.nom_requette_changement == 'Configuration Downtime':
-            message = f"Yello MTNers, veuillez noter l’annulation du changement planifié sur la plateforme {nom_plateforme} du {date_changement} au {fin_changement}, de {heure_debut} à {heure_fin}. Merci pour votre compréhension. IT-MFS"
-        elif changement.Type_requette_changement.nom_requette_changement == 'Maintenance planifiée NA':
-            message = f"Yello MTNers, veuillez noter l’annulation du changement planifié sur la plateforme {nom_plateforme} du {date_changement} au {fin_changement}, de {heure_debut} à {heure_fin}. Merci pour votre compréhension. IT-MFS"
-        elif changement.Type_requette_changement.nom_requette_changement == 'Maintenance planifiée Downtime':
-            message = f"Yello MTNers, veuillez noter l’annulation du changement planifié sur la plateforme {nom_plateforme} du {date_changement} au {fin_changement}, de {heure_debut} à {heure_fin}. Merci pour votre compréhension. IT-MFS"
-        
+        signature = "La DSI" if changement.Type_requette_changement.nom_requette_changement == 'Upgrade BD NA' else "IT-MFS"
+        message = f"Yello MTNers, veuillez noter que le changement planifié sur la plateforme {nom_plateforme} du {date_changement} au {fin_changement}, de {heure_debut} à {heure_fin}, est terminé. Merci pour votre compréhension. {signature}"
+
         if emails:
             send_email_u(subject, message, emails)
         else:
