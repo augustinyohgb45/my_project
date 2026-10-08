@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 #vue acceuil
 @login_required
 def accueil(request):
-    return render(request, 'dashboard/accueil.html')
+    return redirect('acceuil')
 
 # Vue pour l'inscription
 def inscription(request):

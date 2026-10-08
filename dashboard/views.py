@@ -209,6 +209,7 @@ def incident(request):
 
 #     return render(request, 'dashboard/incident.html', {'form': form})
 
+@login_required
 def changement(request):
     form = ChangementForm()
     if request.method == "POST":
@@ -269,61 +270,28 @@ def changement(request):
             heure_fin = changement.heure_fin.strftime("%H:%M")
             services_impacte = changement.services_impacte
 
+            # Type de requête choisi et ses destinataires (communs à tous les types)
+            requete = changement.Type_requette_changement
+            type_nom = requete.nom_requette_changement
+            emails = [destinataire.email for destinataire in requete.destinataires.all()]
             message = ""
-            #emails = []
 
-            # Déterminer le message et l'email en fonction du type de requête
-            if changement.Type_requette_changement.nom_requette_changement == 'Upgrade OS NA':
-                # emails.append('sekongoismael0@gmail.com')
-                requete = Type_requette_changemen.objects.get(nom_requette_changement="Upgrade OS NA")
-                
-                emails = [destinataire.email for destinataire in requete.destinataires.all()]
-                message = requete.message.replace("< nom de la BD et plateform >", bd_plateform )\
-                    .replace("< date début >",date_changement)\
-                    .replace("< date fin >", fin_changement)\
-                    .replace("< heure début >",  heure_debut)\
-                    .replace("< heure fin >", heure_fin)\
+            # Déterminer le message en fonction du type de requête
+            if type_nom in ('Upgrade OS NA', 'Upgrade OS Downtime', 'Upgrade BD NA'):
+                message = (
+                    requete.message.replace("< nom de la BD et plateform >", bd_plateform)
+                    .replace("< date début >", date_changement)
+                    .replace("< date fin >", fin_changement)
+                    .replace("< heure début >", heure_debut)
+                    .replace("< heure fin >", heure_fin)
                     .replace("< nom du service >", str(services_impacte))
-                        
-                print("email valide.")
-            elif changement.Type_requette_changement.nom_requette_changement == 'Upgrade OS Downtime':
-                requete = Type_requette_changemen.objects.get(nom_requette_changement="Upgrade OS Dowtime")
-                emails = [destinataire.email for destinataire in requete.destinataires.all()]
-                message = requete.message.replace("< nom de la BD et plateform >", bd_plateform )\
-                    .replace("< date début >",date_changement)\
-                    .replace("< date fin >", fin_changement)\
-                    .replace("< heure début >",  heure_debut)\
-                    .replace("< heure fin >", heure_fin)\
-                    .replace("< nom du service >", str(services_impacte))
-                        
-                print("email valide.")
-            elif changement.Type_requette_changement.nom_requette_changement == 'Upgrade BD NA':
-                requete = Type_requette_changemen.objects.get(nom_requette_changement="Upgrade BD NA")
-                emails = [destinataire.email for destinataire in requete.destinataires.all()]
-                message = requete.message.replace("< nom de la BD et plateform >", bd_plateform )\
-                    .replace("< date début >",date_changement)\
-                    .replace("< date fin >", fin_changement)\
-                    .replace("< heure début >",  heure_debut)\
-                    .replace("< heure fin >", heure_fin)\
-                    .replace("< nom du service >", str(services_impacte))
-                        
-                print("email valide.")
-                # message = f"Y’ello MTNers Une opération de maintenance sur la base de données < nom de la BD et {nom_plateforme} est prévue dans la nuit du {date_changement} au {fin_changement} de {heure_debut} à {heure_fin}. Cette opération n'aura aucun impact sur {services_impacte}."
-            elif changement.Type_requette_changement.nom_requette_changement == 'Upgrade BD Downtime':
-                emails = [destinataire.email for destinataire in requete.destinataires.all()]
+                )
+            elif type_nom in ('Upgrade BD Downtime', 'Configuration Downtime', 'Maintenance planifiée Downtime'):
                 message = f"Y’ello MTNers Une opération de maintenance sur la plateforme {nom_plateforme} est prévue dans la nuit du {date_changement} au {fin_changement} de {heure_debut} à {heure_fin}. Les canaux {nom_plateforme} ci-dessous seront indisponibles de {heure_debut} à {heure_fin}. Nous excusons pour les désagréments occasionnés. IT-MFS"
-            elif changement.Type_requette_changement.nom_requette_changement == 'Configuration NA':
-                emails = [destinataire.email for destinataire in requete.destinataires.all()]
+            elif type_nom == 'Configuration NA':
                 message = f"Nous effectuerons des travaux de maintenance planifiée sur {nom_plateforme}, le {date_changement} au {fin_changement}, de {heure_debut} à {heure_fin}. Pendant cet intervalle, les utilisateurs peuvent s'attendre à < impact attendu >. IT-MFS"
-            elif changement.Type_requette_changement.nom_requette_changement == 'Configuration Downtime':
-                emails = [destinataire.email for destinataire in requete.destinataires.all()]
-                message = f"Y’ello MTNers Une opération de maintenance sur la plateforme {nom_plateforme} est prévue dans la nuit du {date_changement} au {fin_changement} de {heure_debut} à {heure_fin}. Les canaux {nom_plateforme} ci-dessous seront indisponibles de {heure_debut} à {heure_fin}. Nous excusons pour les désagréments occasionnés. IT-MFS"
-            elif changement.Type_requette_changement.nom_requette_changement == 'Maintenance planifiée NA':
-                emails = [destinataire.email for destinataire in requete.destinataires.all()]
+            elif type_nom == 'Maintenance planifiée NA':
                 message = f"Nous effectuerons des travaux de maintenance planifiée sur {services_impacte}, le {date_changement} au {fin_changement} de {heure_debut} à {heure_fin}. Pendant cet intervalle, les utilisateurs peuvent s'attendre à < impact attendu >."
-            elif changement.Type_requette_changement.nom_requette_changement == 'Maintenance planifiée Downtime':
-                emails = [destinataire.email for destinataire in requete.destinataires.all()]
-                message = f"Y’ello MTNers Une opération de maintenance sur la plateforme {nom_plateforme} est prévue dans la nuit du {date_changement} au {fin_changement} de {heure_debut} à {heure_fin}. Les canaux {nom_plateforme} ci-dessous seront indisponibles de {heure_debut} à {heure_fin}. Nous excusons pour les désagréments occasionnés. IT-MFS"
             
             # Vérifier si des emails sont disponibles
             if not emails and not changement.destinataire_nouveau:
@@ -358,6 +326,7 @@ def changement(request):
     return render(request, 'dashboard/changement.html', {'form': form})
 
 
+@login_required
 def listeincident(request):
     incidents = Incident.objects.select_related('user').all()
     incidents_en_cours = Incident.objects.filter(statut='E')
@@ -366,6 +335,7 @@ def listeincident(request):
         'incidents_en_cours': incidents_en_cours 
     })
 
+@login_required
 def listechangement(request):
     changements = Changement.objects.select_related('user')
     changement_en_cours = Changement.objects.filter(statut='E')
@@ -376,6 +346,7 @@ def listechangement(request):
     
     
 
+@login_required
 def action_statut(request, incident_id):
     incident = get_object_or_404(Incident, id=incident_id)
     
@@ -453,6 +424,7 @@ def action_statut(request, incident_id):
 
 
 
+@login_required
 def action_statut_change(request, changement_id):
     changement = get_object_or_404(Changement, id=changement_id)
     
