@@ -20,3 +20,24 @@ class ConnexionTests(TestCase):
     def test_mauvais_mot_de_passe(self):
         reponse = self.client.post(reverse('connexion'), {'username': 'testeur', 'password': 'faux'})
         self.assertContains(reponse, 'incorrect')
+
+
+class InscriptionTests(TestCase):
+    donnees = {'username': 'nouveau', 'password1': 'Un-mot-de-passe-solide-42', 'password2': 'Un-mot-de-passe-solide-42'}
+
+    def test_visiteur_redirige_vers_la_connexion(self):
+        reponse = self.client.post(reverse('inscription'), self.donnees)
+        self.assertRedirects(reponse, reverse('connexion') + '?next=' + reverse('inscription'))
+        self.assertFalse(User.objects.filter(username='nouveau').exists())
+
+    def test_utilisateur_normal_refuse(self):
+        self.client.force_login(User.objects.create_user('simple', password='motdepasse-test'))
+        self.assertEqual(self.client.get(reverse('inscription')).status_code, 403)
+        self.assertEqual(self.client.post(reverse('inscription'), self.donnees).status_code, 403)
+        self.assertFalse(User.objects.filter(username='nouveau').exists())
+
+    def test_administrateur_cree_un_compte(self):
+        self.client.force_login(User.objects.create_superuser('admin', password='motdepasse-test'))
+        reponse = self.client.post(reverse('inscription'), self.donnees)
+        self.assertRedirects(reponse, reverse('acceuil'))
+        self.assertTrue(User.objects.filter(username='nouveau').exists())

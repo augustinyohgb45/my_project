@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, redirect
 from django.utils.http import url_has_allowed_host_and_scheme
 
@@ -11,12 +12,18 @@ def accueil(request):
     return redirect('acceuil')
 
 
+@login_required
 def inscription(request):
+    # Seuls les administrateurs peuvent créer des comptes
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('connexion')
+            utilisateur = form.save()
+            messages.success(request, f"L'utilisateur « {utilisateur.username} » a été créé.")
+            return redirect('acceuil')
     else:
         form = UserCreationForm()
 
