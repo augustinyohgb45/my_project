@@ -1,0 +1,9 @@
+<div class="form-group">
+    <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input{% if champ.errors %} is-invalid{% endif %}" id="{{ champ.id_for_label }}"
+            name="{{ champ.html_name }}"{% if champ.value %} checked{% endif %}>
+        <label class="custom-control-label font-weight-bold small text-gray-700" for="{{ champ.id_for_label }}">{{ champ.label }}</label>
+    </div>
+    {% for erreur in champ.errors %}<div class="invalid-feedback d-block">{{ erreur }}</div>{% endfor %}
+    {% if champ.help_text %}<small class="form-text text-muted">{{ champ.help_text }}</small>{% endif %}
+</div>

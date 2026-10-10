@@ -9,10 +9,13 @@
         <h1 class="h3 text-gray-800">Ajouter un utilisateur</h1>
         <p class="sous-titre">Créez un compte pour un membre de l'équipe.</p>
     </div>
+    <a href="{% url 'utilisateurs' %}" class="btn btn-light shadow-sm">
+        <i class="fas fa-arrow-left mr-1"></i> Retour aux utilisateurs
+    </a>
 </div>
 
 <div class="row">
-    <div class="col-xl-6 col-lg-8">
+    <div class="col-xl-7 col-lg-9">
         <div class="card shadow mb-4">
             <div class="card-body p-4">
                 {% for erreur in form.non_field_errors %}
@@ -22,6 +25,10 @@
                 <form method="post" action="{% url 'inscription' %}" novalidate>
                     {% csrf_token %}
                     <div class="form-row">
+                        <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.first_name %}</div>
+                        <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.last_name %}</div>
+                    </div>
+                    <div class="form-row">
                         <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.username %}</div>
                         <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.email %}</div>
                     </div>
@@ -30,15 +37,10 @@
                         <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.password2 %}</div>
                     </div>
 
-                    <div class="custom-control custom-switch mb-1">
-                        <input type="checkbox" class="custom-control-input" id="{{ form.est_admin.id_for_label }}"
-                            name="{{ form.est_admin.html_name }}"{% if form.est_admin.value %} checked{% endif %}>
-                        <label class="custom-control-label font-weight-bold small text-gray-700" for="{{ form.est_admin.id_for_label }}">{{ form.est_admin.label }}</label>
-                    </div>
-                    <small class="form-text text-muted mb-3">{{ form.est_admin.help_text }}</small>
+                    {% include 'auth/includes/interrupteur.html' with champ=form.est_admin %}
 
                     <div class="actions-etape">
-                        <a href="{% url 'acceuil' %}" class="btn btn-light">Annuler</a>
+                        <a href="{% url 'utilisateurs' %}" class="btn btn-light">Annuler</a>
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-user-plus mr-1"></i> Créer le compte
                         </button>

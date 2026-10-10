@@ -1,0 +1,151 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Utilisateurs{% endblock %}
+{% block titre_page %}Administration{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'vendor/datatables/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="entete-page">
+    <div>
+        <h1 class="h3 text-gray-800">Utilisateurs</h1>
+        <p class="sous-titre">Gérez les comptes qui ont accès à l'application.</p>
+    </div>
+    <a href="{% url 'inscription' %}" class="btn btn-primary shadow-sm">
+        <i class="fas fa-user-plus mr-1"></i> Ajouter un utilisateur
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card carte-indicateur border-left-primary shadow h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Comptes</div>
+                    <div class="valeur">{{ comptes|length }}</div>
+                </div>
+                <div class="icone icone-bleu"><i class="fas fa-users"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card carte-indicateur border-left-success shadow h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Comptes actifs</div>
+                    <div class="valeur">{{ nb_actifs }}</div>
+                </div>
+                <div class="icone icone-vert"><i class="fas fa-user-check"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card carte-indicateur border-left-warning shadow h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Administrateurs actifs</div>
+                    <div class="valeur">{{ nb_admins }}</div>
+                </div>
+                <div class="icone icone-jaune"><i class="fas fa-user-shield"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Liste des comptes</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover" id="tableUtilisateurs" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Utilisateur</th>
+                        <th>Rôle</th>
+                        <th>État</th>
+                        <th>Dernière connexion</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for compte in comptes %}
+                    <tr{% if not compte.is_active %} class="text-muted"{% endif %}>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <span class="avatar-initiales mr-3">{{ compte.username|slice:":2"|upper }}</span>
+                                <div>
+                                    <div class="font-weight-bold text-gray-800">
+                                        {{ compte.username }}{% if compte == user %} <span class="small text-muted">(vous)</span>{% endif %}
+                                    </div>
+                                    <div class="small text-muted">
+                                        {% if compte.get_full_name %}{{ compte.get_full_name }} · {% endif %}{{ compte.email|default:"pas d'e-mail" }}
+                                    </div>
+                                    <div class="small text-muted">Créé le {{ compte.date_joined|date:"d/m/Y" }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if compte.is_superuser %}
+                            <span class="badge badge-statut badge-admin"><i class="fas fa-user-shield mr-1"></i>Administrateur</span>
+                            {% else %}
+                            <span class="badge badge-statut badge-utilisateur"><i class="fas fa-user mr-1"></i>Utilisateur</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if compte.is_active %}
+                            <span class="badge badge-statut badge-cloture"><i class="fas fa-check mr-1"></i>Actif</span>
+                            {% else %}
+                            <span class="badge badge-statut badge-inactif"><i class="fas fa-ban mr-1"></i>Désactivé</span>
+                            {% endif %}
+                        </td>
+                        <td data-order="{{ compte.last_login|date:'U'|default:'0' }}">{{ compte.last_login|date:"d/m/Y H:i"|default:"Jamais" }}</td>
+                        <td class="text-right text-nowrap">
+                            <a href="{% url 'modifier_utilisateur' compte.id %}" class="btn btn-sm btn-light border" title="Modifier">
+                                <i class="fas fa-pen"></i><span class="d-none d-xl-inline ml-1">Modifier</span>
+                            </a>
+                            {% if compte != user %}
+                            <form action="{% url 'activer_utilisateur' compte.id %}" method="post" class="d-inline"
+                                {% if compte.is_active %}
+                                data-confirmation-titre="Désactiver « {{ compte.username }} » ?"
+                                data-confirmation="Ce compte ne pourra plus se connecter. Ses incidents et changements sont conservés, et vous pourrez le réactiver à tout moment."
+                                {% endif %}>
+                                {% csrf_token %}
+                                {% if compte.is_active %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Désactiver">
+                                    <i class="fas fa-ban"></i><span class="d-none d-xl-inline ml-1">Désactiver</span>
+                                </button>
+                                {% else %}
+                                <button type="submit" class="btn btn-sm btn-outline-success" title="Réactiver">
+                                    <i class="fas fa-undo"></i><span class="d-none d-xl-inline ml-1">Réactiver</span>
+                                </button>
+                                {% endif %}
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'vendor/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
+<script>
+    $(function () {
+        $('#tableUtilisateurs').DataTable({
+            order: [],
+            pageLength: 10,
+            columnDefs: [{ orderable: false, targets: -1 }],
+            language: { url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json' }
+        });
+    });
+</script>
+{% endblock %}

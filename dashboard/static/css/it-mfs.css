@@ -414,3 +414,33 @@ a:hover { color: var(--itmfs-bleu-fonce); }
 .page-link {
     color: var(--itmfs-bleu);
 }
+
+/* ---------- Utilisateurs ---------- */
+.avatar-initiales {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--itmfs-bleu-clair);
+    color: var(--itmfs-bleu);
+    font-weight: 800;
+    font-size: .85rem;
+}
+
+.avatar-initiales.avatar-grand {
+    width: 3.5rem;
+    height: 3.5rem;
+    font-size: 1.1rem;
+}
+
+.badge-admin { background-color: #fff3cd; color: #8a6d00; }
+.badge-utilisateur { background-color: var(--itmfs-bleu-clair); color: var(--itmfs-bleu); }
+.badge-inactif { background-color: #f1f1f4; color: #858796; }
+
+.custom-control-input:checked ~ .custom-control-label::before {
+    background-color: var(--itmfs-bleu);
+    border-color: var(--itmfs-bleu);
+}

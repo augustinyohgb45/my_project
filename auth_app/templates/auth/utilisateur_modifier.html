@@ -1,0 +1,74 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Modifier {{ compte.username }}{% endblock %}
+{% block titre_page %}Administration{% endblock %}
+
+{% block content %}
+<div class="entete-page">
+    <div class="d-flex align-items-center">
+        <span class="avatar-initiales avatar-grand mr-3">{{ compte.username|slice:":2"|upper }}</span>
+        <div>
+            <h1 class="h3 text-gray-800">{{ compte.username }}</h1>
+            <p class="sous-titre">
+                {% if compte.is_superuser %}Administrateur{% else %}Utilisateur{% endif %}
+                · {% if compte.is_active %}actif{% else %}désactivé{% endif %}
+                · créé le {{ compte.date_joined|date:"d/m/Y" }}
+                · dernière connexion : {{ compte.last_login|date:"d/m/Y H:i"|default:"jamais" }}
+            </p>
+        </div>
+    </div>
+    <a href="{% url 'utilisateurs' %}" class="btn btn-light shadow-sm">
+        <i class="fas fa-arrow-left mr-1"></i> Retour aux utilisateurs
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-7">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-id-card mr-2"></i>Informations et rôle</h6>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.first_name %}</div>
+                        <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.last_name %}</div>
+                    </div>
+                    {% include 'dashboard/includes/champ.html' with champ=form.email %}
+
+                    {% include 'auth/includes/interrupteur.html' with champ=form.est_admin %}
+                    {% include 'auth/includes/interrupteur.html' with champ=form.is_active %}
+
+                    <div class="actions-etape">
+                        <a href="{% url 'utilisateurs' %}" class="btn btn-light">Annuler</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save mr-1"></i> Enregistrer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-key mr-2"></i>Mot de passe</h6>
+            </div>
+            <div class="card-body p-4">
+                <p class="small text-muted">Définissez un nouveau mot de passe, puis communiquez-le à la personne de façon sécurisée.</p>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" name="mot_de_passe" value="1">
+                    {% include 'dashboard/includes/champ.html' with champ=form_mdp.new_password1 %}
+                    {% include 'dashboard/includes/champ.html' with champ=form_mdp.new_password2 %}
+                    <button type="submit" class="btn btn-outline-primary btn-block">
+                        <i class="fas fa-key mr-1"></i> Changer le mot de passe
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
