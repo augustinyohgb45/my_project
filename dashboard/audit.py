@@ -13,6 +13,8 @@ from django.db.models.signals import m2m_changed, post_delete, post_save, pre_sa
 from django.dispatch import receiver
 from django.utils import timezone
 
+from bar.models import Categorie, MouvementStock, Produit
+
 from .models import (
     Changement, Destinataire, Incident, JournalAudit, Service, Type_requette, Type_requette_changemen,
 )
@@ -29,10 +31,13 @@ MODELES_SUIVIS = {
     Type_requette: "Type d'incident",
     Type_requette_changemen: "Type de changement",
     User: "Utilisateur",
+    Produit: "Produit du bar",
+    Categorie: "Catégorie du bar",
+    MouvementStock: "Mouvement de stock",
 }
 
 # Champs techniques ignorés dans le détail des modifications
-CHAMPS_IGNORES = {'id', 'last_login', 'date_joined', 'date_enregistrement', 'en_cours', 'password'}
+CHAMPS_IGNORES = {'id', 'last_login', 'date_joined', 'date_enregistrement', 'en_cours', 'password', 'date_creation'}
 
 # Libellés affichés pour les champs modifiés
 LIBELLES = {
@@ -46,6 +51,9 @@ LIBELLES = {
     'nom_requette': "Nom", 'nom_requette_changement': "Nom",
     'username': "Nom d'utilisateur", 'first_name': "Prénom", 'last_name': "Nom",
     'is_active': "Compte actif", 'is_superuser': "Administrateur", 'is_staff': "Accès à l'admin",
+    'code': "Code", 'categorie': "Catégorie", 'prix_achat': "Prix d'achat", 'prix_vente': "Prix de vente",
+    'seuil_alerte': "Seuil d'alerte", 'actif': "En vente", 'ordre': "Ordre", 'produit': "Produit",
+    'quantite': "Quantité", 'prix_unitaire': "Prix unitaire", 'motif': "Motif", 'utilisateur': "Par",
 }
 
 

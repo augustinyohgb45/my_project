@@ -1,0 +1,49 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}{% if creation %}Nouveau produit{% else %}Modifier {{ produit }}{% endif %}{% endblock %}
+{% block titre_page %}Bar Dynasty{% endblock %}
+
+{% block content %}
+<div class="entete-page">
+    <div>
+        <h1 class="h3 text-gray-800">{% if creation %}Nouveau produit{% else %}{{ produit }}{% endif %}</h1>
+        <p class="sous-titre">{% if creation %}Ajouter un produit au catalogue du bar.{% else %}Code {{ produit.code }} · stock actuel : {{ produit.stock_actuel }}{% endif %}</p>
+    </div>
+    <a href="{% url 'bar_stock' %}" class="btn btn-light shadow-sm">
+        <i class="fas fa-arrow-left mr-1"></i> Retour au stock
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-7">
+        <div class="card shadow mb-4">
+            <div class="card-body p-4">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="col-md-4">{% include 'dashboard/includes/champ.html' with champ=form.code %}</div>
+                        <div class="col-md-8">{% include 'dashboard/includes/champ.html' with champ=form.nom %}</div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.categorie %}</div>
+                        <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.nouvelle_categorie %}</div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-4">{% include 'dashboard/includes/champ.html' with champ=form.prix_achat %}</div>
+                        <div class="col-md-4">{% include 'dashboard/includes/champ.html' with champ=form.prix_vente %}</div>
+                        <div class="col-md-4">{% include 'dashboard/includes/champ.html' with champ=form.seuil_alerte %}</div>
+                    </div>
+                    {% include 'auth/includes/interrupteur.html' with champ=form.actif %}
+
+                    <div class="actions-etape">
+                        <a href="{% url 'bar_stock' %}" class="btn btn-light">Annuler</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save mr-1"></i> Enregistrer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
