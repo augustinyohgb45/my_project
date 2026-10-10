@@ -1,121 +1,88 @@
-<!DOCTYPE html>
+{% extends 'dashboard/base.html' %}
 {% load static %}
 
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="{% static 'css/incident.css' %}" rel="stylesheet">
-    <title>Incident</title>
-    <style>
-        .step { display: none; }
-        .step.active { display: block; }
-        .error { color: red; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>Notifier incident</h2>
-        {% for error in form.non_field_errors %}<div class="error">{{ error }}</div>{% endfor %}
-        <form id="changeForm" method="post">
-            {% csrf_token %}
-            
-            <!-- Étape 1 -->
-            <div class="step active" id="step1">
-                <div class="form-group">
-                    <label for="{{ form.numero_ticket.id_for_label }}">Number ticket</label>
-                    {{ form.numero_ticket }}
-                    <div class="error">{{ form.numero_ticket.errors|join:", " }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.type_requette.id_for_label }}">Incident type</label>
-                    {{ form.type_requette }}
-                    <div class="error">{{ form.type_requette.errors|join:", " }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.services_impacte.id_for_label }}">Service</label>
-                    {{ form.services_impacte }}
-                    <div class="error">{{ form.services_impacte.errors|join:", " }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.description.id_for_label }}">Comment</label>
-                    {{ form.description }}
-                    <div class="error">{{ form.description.errors|join:", " }}</div>
-                </div>
-                <div id="step1-error" class="error"></div>
-                <button type="button" onclick="nextStep()">Next</button>
+{% block title %}Déclarer un incident{% endblock %}
+{% block titre_page %}Incidents{% endblock %}
+
+{% block content %}
+<div class="entete-page">
+    <div>
+        <h1 class="h3 text-gray-800">Déclarer un incident</h1>
+        <p class="sous-titre">Les destinataires sont prévenus par e-mail dès l'enregistrement.</p>
+    </div>
+    <a href="{% url 'listeincident' %}" class="btn btn-light shadow-sm">
+        <i class="fas fa-list mr-1"></i> Voir les incidents
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-body p-4">
+                <ol class="etapes">
+                    <li>Incident</li>
+                    <li>Notification</li>
+                </ol>
+
+                {% for erreur in form.non_field_errors %}
+                <div class="alert alert-danger">{{ erreur }}</div>
+                {% endfor %}
+
+                <form method="post" class="assistant" novalidate>
+                    {% csrf_token %}
+
+                    <div class="etape">
+                        <div class="form-row">
+                            <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.numero_ticket %}</div>
+                            <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.type_requette %}</div>
+                        </div>
+                        {% include 'dashboard/includes/champ.html' with champ=form.services_impacte %}
+                        {% include 'dashboard/includes/champ.html' with champ=form.description %}
+
+                        <div class="actions-etape">
+                            <a href="{% url 'acceuil' %}" class="btn btn-light">Annuler</a>
+                            <button type="button" class="btn btn-primary" data-etape="suivante">
+                                Suivant <i class="fas fa-arrow-right ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="etape">
+                        {% include 'dashboard/includes/champ.html' with champ=form.destinataire_nouveau %}
+                        <div class="form-row">
+                            <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.date_envoie %}</div>
+                            <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.statut %}</div>
+                        </div>
+
+                        <div class="actions-etape">
+                            <button type="button" class="btn btn-light" data-etape="precedente">
+                                <i class="fas fa-arrow-left mr-1"></i> Précédent
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane mr-1"></i> Enregistrer et notifier
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
-            
-            <!-- Étape 2 -->
-            <div class="step" id="step2">
-                <div class="form-group">
-                    <label for="{{ form.destinataire_nouveau.id_for_label }}">Enter email of new recipient</label>
-                    {{ form.destinataire_nouveau }}
-                    <div class="error">{{ form.destinataire_nouveau.errors|join:", " }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.date_envoie.id_for_label }}">Date of sending</label>
-                    {{ form.date_envoie }}
-                    <div class="error">{{ form.date_envoie.errors|join:", " }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.statut.id_for_label }}">Status</label>
-                    {{ form.statut }}
-                    <div class="error">{{ form.statut.errors|join:", " }}</div>
-                </div>
-                
-                <div id="step2-error" class="error"></div>
-                <button type="button" onclick="prevStep()">Previous</button>
-                <button type="submit">Submit</button>
-            </div>
-        </form>
+        </div>
     </div>
 
-    <script>
-        let currentStep = 1;
-        const steps = document.querySelectorAll('.step');
-        
-        function showStep(step) {
-            steps.forEach((element, index) => {
-                element.classList.toggle('active', index + 1 === step);
-            });
-        }
+    <div class="col-lg-4">
+        <div class="card shadow mb-4 carte-aide">
+            <div class="card-body">
+                <h6 class="font-weight-bold text-gray-800"><i class="fas fa-lightbulb text-warning mr-2"></i>Bon à savoir</h6>
+                <ul class="small text-gray-700 pl-3 mb-0">
+                    <li class="mb-2">Un e-mail part pour les types <strong>indisponibilite</strong> et <strong>instabilite</strong>.</li>
+                    <li class="mb-2">Il est envoyé aux destinataires du type (configurés dans l'admin) et au destinataire supplémentaire.</li>
+                    <li>Quand l'incident est résolu, clôturez-le depuis la liste : un e-mail de résolution est envoyé.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
-        function validateStep(step) {
-            let isValid = true;
-            const fields = steps[step - 1].querySelectorAll('input, select, textarea');
-            const errorDiv = document.querySelector(`#step${step}-error`);
-            errorDiv.textContent = '';
-
-            fields.forEach(field => {
-                if (field.required && !field.value.trim()) {
-                    errorDiv.textContent += `Le champ ${field.previousElementSibling.textContent} est obligatoire. `;
-                    isValid = false;
-                }
-            });
-
-            return isValid;
-        }
-
-        function nextStep() {
-            if (validateStep(currentStep)) {
-                if (currentStep < steps.length) {
-                    currentStep++;
-                    showStep(currentStep);
-                }
-            }
-        }
-
-        function prevStep() {
-            if (currentStep > 1) {
-                currentStep--;
-                showStep(currentStep);
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            showStep(currentStep);
-        });
-    </script>
-</body>
-</html>
+{% block extra_js %}
+<script src="{% static 'js/assistant-formulaire.js' %}"></script>
+{% endblock %}

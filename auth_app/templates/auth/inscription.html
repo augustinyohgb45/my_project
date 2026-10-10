@@ -1,121 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscription</title>
-</head>
-<body>
-    <div class="container">
-        <div class="container">
-            <div class="form">
-                <form method="post" action="{% url 'inscription' %}">
-                    {% csrf_token %}
-                    <h1>Inscrit un utilisateur</h1>
-                    {{ form.as_p }}    
-                    <button type="submit">valider</button>
-                </form>
-                {% comment %} <p class="link">Déjà Inscrit ? <a href="{% url 'connexion' %}">Se connecter</a></p> {% endcomment %}
-            </div>
-        </div>      
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Ajouter un utilisateur{% endblock %}
+{% block titre_page %}Administration{% endblock %}
+
+{% block content %}
+<div class="entete-page">
+    <div>
+        <h1 class="h3 text-gray-800">Ajouter un utilisateur</h1>
+        <p class="sous-titre">Créez un compte pour un membre de l'équipe.</p>
     </div>
-    <style>
-        /* CSS */
-        /* Import Google font - Poppins */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+</div>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
+<div class="row">
+    <div class="col-xl-6 col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-body p-4">
+                {% for erreur in form.non_field_errors %}
+                <div class="alert alert-danger">{{ erreur }}</div>
+                {% endfor %}
 
-        h1 {
-            margin: 20px 0;
-        }
+                <form method="post" action="{% url 'inscription' %}" novalidate>
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.username %}</div>
+                        <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.email %}</div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.password1 %}</div>
+                        <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.password2 %}</div>
+                    </div>
 
-        body {
-            min-height: 100vh;
-            width: 100%;
-            background: blanchedalmond;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-image: url(https://marketingedge.com.ng/wp-content/uploads/2023/10/mtn-momo-api-dictionary-for-developers-jpg.webp);
-        }
+                    <div class="custom-control custom-switch mb-1">
+                        <input type="checkbox" class="custom-control-input" id="{{ form.est_admin.id_for_label }}"
+                            name="{{ form.est_admin.html_name }}"{% if form.est_admin.value %} checked{% endif %}>
+                        <label class="custom-control-label font-weight-bold small text-gray-700" for="{{ form.est_admin.id_for_label }}">{{ form.est_admin.label }}</label>
+                    </div>
+                    <small class="form-text text-muted mb-3">{{ form.est_admin.help_text }}</small>
 
-        .container {
-            width: 400px;
-            background: #fff;
-            border-radius: 7px;
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        .container .form {
-            padding: 30px;
-        }
-
-        label {
-            padding: 10px 0;
-            color: black;
-            cursor: pointer;
-        }
-
-        input {
-            width: 100%;
-            padding: 10px;
-            font-size: 17px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            outline: none;
-            margin-bottom: 15px;
-            margin-top: 10px;
-        }
-
-        a {
-            font-size: 16px;
-            color: #009579;
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        button {
-            color: #fff;
-            background: #00008B;
-            width: 100%;
-            padding: 10px;
-            font-size: 17px;
-            margin-top: 10px;
-            border: none;
-            border-radius: 6px;
-            outline: none;
-        }
-
-        button:hover {
-            background: #FFD700;
-        }
-
-        .link {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .error {
-            background-color: red;
-            color: #fff;
-            border-radius: 6px;
-            padding: 10px;
-            margin-bottom: 10px;
-            font-size: 14px;      
-            text-align: center; 
-        }
-        ul {
-            list-style: none;
-            color: red;
-        }
-    </style>
-</body>
-</html>
+                    <div class="actions-etape">
+                        <a href="{% url 'acceuil' %}" class="btn btn-light">Annuler</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-user-plus mr-1"></i> Créer le compte
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -2,61 +2,84 @@
 {% load static %}
 
 {% block title %}Liste des changements{% endblock %}
+{% block titre_page %}Changements{% endblock %}
 
 {% block extra_css %}
 <link href="{% static 'vendor/datatables/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-2 text-gray-800">Changements</h1>
+<div class="entete-page">
+    <div>
+        <h1 class="h3 text-gray-800">Changements</h1>
+        <p class="sous-titre">{{ changements|length }} changement{{ changements|length|pluralize }} enregistré{{ changements|length|pluralize }}.</p>
+    </div>
+    <a href="{% url 'changement' %}" class="btn btn-primary shadow-sm">
+        <i class="fas fa-plus mr-1"></i> Planifier un changement
+    </a>
+</div>
 
 <div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">liste des changements</h6>
+    <div class="card-header py-3 d-flex flex-wrap align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary">Liste des changements</h6>
+        <div class="btn-group btn-group-sm filtres-statut" role="group" aria-label="Filtrer par statut">
+            <button type="button" class="btn btn-outline-primary active" data-filtre="">Tous</button>
+            <button type="button" class="btn btn-outline-primary" data-filtre="En cours">En cours</button>
+            <button type="button" class="btn btn-outline-primary" data-filtre="Clôturé">Clôturés</button>
+        </div>
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+            <table class="table table-hover" id="dataTable" width="100%" cellspacing="0">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Service Impacté</th>
-                        <th>type changement</th>
-                        <th>Date d'Enregistrement</th>
-                        <th>Date changement</th>
-                        <th>fin changement</th>
-                        <th>date envoie</th>
-                        <th>utilisateur</th>
+                        <th>Ticket</th>
+                        <th>Plateforme</th>
+                        <th>Service</th>
+                        <th>Type</th>
+                        <th>Début</th>
+                        <th>Fin</th>
+                        <th>Notification</th>
                         <th>Destinataires</th>
-                        <th>destinataire nouveau</th>
-                        <th>description</th>
-                        <th>statut</th>
-                        <th>action</th>
+                        <th>Par</th>
+                        <th data-colonne-statut>Statut</th>
+                        <th class="text-right">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for changement in changements %}
                     <tr>
-                        <td>{{ changement.id }}</td>
+                        <td class="font-weight-bold text-gray-800">{{ changement.Numero_ticket }}</td>
+                        <td>{{ changement.nom_plateforme }}</td>
                         <td>{{ changement.services_impacte }}</td>
                         <td>{{ changement.Type_requette_changement }}</td>
-                        <td>{{ changement.date_enregistrement }}</td>
-                        <td>{{ changement.date_changement }}</td>
-                        <td>{{ changement.fin_changement }}</td>
-                        <td>{{ changement.date_envoie }}</td>
+                        <td data-order="{{ changement.date_changement|date:'U' }}">{{ changement.date_changement|date:"d/m/Y H:i" }}</td>
+                        <td data-order="{{ changement.fin_changement|date:'U' }}">{{ changement.fin_changement|date:"d/m/Y H:i" }}</td>
+                        <td data-order="{{ changement.date_envoie|date:'U' }}">
+                            {{ changement.date_envoie|date:"d/m/Y H:i" }}
+                            {% if changement.email_envoye %}
+                            <span class="d-block small text-success"><i class="fas fa-paper-plane mr-1"></i>envoyée</span>
+                            {% else %}
+                            <span class="d-block small text-warning"><i class="fas fa-clock mr-1"></i>non envoyée</span>
+                            {% endif %}
+                        </td>
+                        <td class="cellule-texte small">
+                            {{ changement.Type_requette_changement.destinataires.all|join:", " }}{% if changement.destinataire_nouveau %}{% if changement.Type_requette_changement.destinataires.all %}, {% endif %}{{ changement.destinataire_nouveau }}{% endif %}
+                        </td>
                         <td>{{ changement.user.username }}</td>
-                        <td>{{ changement.Type_requette_changement.destinataires.all|join:", " }}</td>
-                        <td>{{ changement.destinataire_nouveau|default:"" }}</td>
-                        <td>{{ changement.description }}</td>
-                        <td>{{ changement.get_statut_display }}</td>
-                        <td>
+                        <td>{% include 'dashboard/includes/badge_statut.html' with en_cours=changement.en_cours %}</td>
+                        <td class="text-right">
                             {% if changement.en_cours %}
-                            <form action="{% url 'action_statut_change' changement.id %}" method="POST">
+                            <form action="{% url 'action_statut_change' changement.id %}" method="POST"
+                                data-confirmation-titre="Clôturer le changement {{ changement.Numero_ticket }} ?"
+                                data-confirmation="Le changement sur {{ changement.nom_plateforme }} sera marqué comme terminé et un e-mail de fin sera envoyé aux destinataires.">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-success">cloture</button>
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="fas fa-check mr-1"></i> Clôturer
+                                </button>
                             </form>
                             {% else %}
-                            <span class="badge badge-info p-2">terminé</span>
+                            <span class="text-muted small">—</span>
                             {% endif %}
                         </td>
                     </tr>

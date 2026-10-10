@@ -55,7 +55,8 @@ def acceuil(request):
             'incidents': _nombre_par_mois(Incident.objects.all(), mois),
             'changements': _nombre_par_mois(Changement.objects.all(), mois),
         },
-    }
+        'derniers_incidents': Incident.objects.select_related('services_impacte', 'type_requette').order_by('-date_enregistrement')[:5],
+        'derniers_changements': Changement.objects.select_related('services_impacte', 'Type_requette_changement').order_by('-date_enregistrement')[:5],    }
     return render(request, 'dashboard/index.html', context)
 
 

@@ -2,8 +2,8 @@
 Chart.defaults.global.defaultFontFamily = 'Nunito, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
 Chart.defaults.global.defaultFontColor = '#858796';
 
-var BLEU = '78, 115, 223';
-var VERT = '28, 200, 138';
+var BLEU = '0, 85, 122';
+var JAUNE = '255, 203, 5';
 
 var infoBulle = {
   backgroundColor: 'rgb(255,255,255)',
@@ -48,7 +48,7 @@ new Chart(document.getElementById('myAreaChart'), {
     labels: graphique.mois,
     datasets: [
       courbe('Incidents', BLEU, graphique.incidents),
-      courbe('Changements', VERT, graphique.changements),
+      courbe('Changements', JAUNE, graphique.changements),
     ],
   },
   options: {
@@ -82,8 +82,8 @@ new Chart(document.getElementById('myPieChart'), {
     labels: ['incident', 'changement'],
     datasets: [{
       data: [lireDonnees('total-incidents'), lireDonnees('total-changements')],
-      backgroundColor: ['rgb(' + BLEU + ')', 'rgb(' + VERT + ')'],
-      hoverBackgroundColor: ['#2e59d9', '#17a673'],
+      backgroundColor: ['rgb(' + BLEU + ')', 'rgb(' + JAUNE + ')'],
+      hoverBackgroundColor: ['#003049', '#e0b000'],
       hoverBorderColor: 'rgba(234, 236, 244, 1)',
     }],
   },

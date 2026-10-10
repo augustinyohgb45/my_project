@@ -186,3 +186,22 @@ class PagesTests(TestCase):
         self.incident.refresh_from_db()
         self.assertEqual(self.incident.statut, 'C')
         self.assertFalse(self.incident.en_cours)
+
+
+class ValidationFormulairesTests(TestCase):
+    setUp = AjoutServiceEtTypeTests.setUp
+    donnees = AjoutServiceEtTypeTests.donnees
+
+    def test_fin_avant_debut_refusee(self):
+        maintenant = timezone.localtime()
+        reponse = self.client.post(reverse('changement'), self.donnees(
+            fin_changement=(maintenant - timedelta(days=1)).strftime('%Y-%m-%dT%H:%M'),
+        ))
+        self.assertContains(reponse, "La fin du changement doit être après son début.")
+        self.assertEqual(Changement.objects.count(), 0)
+
+    def test_destinataire_invalide_refuse(self):
+        reponse = self.client.post(reverse('changement'), self.donnees(destinataire_nouveau='pas-un-email'))
+        self.assertEqual(reponse.status_code, 200)
+        self.assertContains(reponse, 'is-invalid')
+        self.assertEqual(Changement.objects.count(), 0)

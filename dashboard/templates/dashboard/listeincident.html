@@ -2,53 +2,71 @@
 {% load static %}
 
 {% block title %}Liste des incidents{% endblock %}
+{% block titre_page %}Incidents{% endblock %}
 
 {% block extra_css %}
 <link href="{% static 'vendor/datatables/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-2 text-gray-800">Incidents</h1>
+<div class="entete-page">
+    <div>
+        <h1 class="h3 text-gray-800">Incidents</h1>
+        <p class="sous-titre">{{ incidents|length }} incident{{ incidents|length|pluralize }} enregistré{{ incidents|length|pluralize }}.</p>
+    </div>
+    <a href="{% url 'incident' %}" class="btn btn-primary shadow-sm">
+        <i class="fas fa-plus mr-1"></i> Déclarer un incident
+    </a>
+</div>
 
 <div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">liste des incidents</h6>
+    <div class="card-header py-3 d-flex flex-wrap align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary">Liste des incidents</h6>
+        <div class="btn-group btn-group-sm filtres-statut" role="group" aria-label="Filtrer par statut">
+            <button type="button" class="btn btn-outline-primary active" data-filtre="">Tous</button>
+            <button type="button" class="btn btn-outline-primary" data-filtre="En cours">En cours</button>
+            <button type="button" class="btn btn-outline-primary" data-filtre="Clôturé">Clôturés</button>
+        </div>
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+            <table class="table table-hover" id="dataTable" width="100%" cellspacing="0">
                 <thead>
                     <tr>
-                        <th>id</th>
-                        <th>Service Impacté</th>
-                        <th>type incident</th>
-                        <th>Date d'Enregistrement</th>
+                        <th>Ticket</th>
+                        <th>Service</th>
+                        <th>Type</th>
+                        <th>Enregistré le</th>
                         <th>Description</th>
-                        <th>Utilisateur</th>
-                        <th>destinataire nouveau</th>
-                        <th>Statut</th>
-                        <th>action</th>
+                        <th>Par</th>
+                        <th>Destinataire suppl.</th>
+                        <th data-colonne-statut>Statut</th>
+                        <th class="text-right">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for incident in incidents %}
                     <tr>
-                        <td>{{ incident.id }}</td>
+                        <td class="font-weight-bold text-gray-800">{{ incident.numero_ticket }}</td>
                         <td>{{ incident.services_impacte }}</td>
                         <td>{{ incident.type_requette }}</td>
-                        <td>{{ incident.date_enregistrement }}</td>
-                        <td>{{ incident.description }}</td>
+                        <td data-order="{{ incident.date_enregistrement|date:'U' }}">{{ incident.date_enregistrement|date:"d/m/Y H:i" }}</td>
+                        <td class="cellule-texte">{{ incident.description|truncatechars:80 }}</td>
                         <td>{{ incident.user.username }}</td>
-                        <td>{{ incident.destinataire_nouveau|default:"" }}</td>
-                        <td>{{ incident.get_statut_display }}</td>
-                        <td>
+                        <td>{{ incident.destinataire_nouveau|default:"—" }}</td>
+                        <td>{% include 'dashboard/includes/badge_statut.html' with en_cours=incident.en_cours %}</td>
+                        <td class="text-right">
                             {% if incident.en_cours %}
-                            <form action="{% url 'action_statut' incident.id %}" method="POST">
+                            <form action="{% url 'action_statut' incident.id %}" method="POST"
+                                data-confirmation-titre="Clôturer l'incident {{ incident.numero_ticket }} ?"
+                                data-confirmation="L'incident sur {{ incident.services_impacte }} sera marqué comme résolu et un e-mail de résolution sera envoyé aux destinataires.">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-success">cloture</button>
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="fas fa-check mr-1"></i> Clôturer
+                                </button>
                             </form>
                             {% else %}
-                            <span class="badge badge-info p-2">terminé</span>
+                            <span class="text-muted small">—</span>
                             {% endif %}
                         </td>
                     </tr>

@@ -1,0 +1,416 @@
+/* Thème IT-MFS : couleurs MoMo / MTN par-dessus SB Admin 2 */
+:root {
+    --itmfs-bleu: #00557a;
+    --itmfs-bleu-fonce: #003049;
+    --itmfs-bleu-clair: #e6f1f6;
+    --itmfs-jaune: #ffcb05;
+    --itmfs-jaune-fonce: #e0b000;
+    --itmfs-gris: #5a5c69;
+}
+
+body {
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* ---------- Couleurs principales ---------- */
+.bg-gradient-primary {
+    background-color: var(--itmfs-bleu);
+    background-image: linear-gradient(180deg, var(--itmfs-bleu) 10%, var(--itmfs-bleu-fonce) 100%);
+}
+
+.btn-primary {
+    background-color: var(--itmfs-bleu);
+    border-color: var(--itmfs-bleu);
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:not(:disabled):not(.disabled):active {
+    background-color: var(--itmfs-bleu-fonce);
+    border-color: var(--itmfs-bleu-fonce);
+}
+
+.btn-outline-primary {
+    color: var(--itmfs-bleu);
+    border-color: var(--itmfs-bleu);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary.active,
+.btn-outline-primary:not(:disabled):not(.disabled).active {
+    background-color: var(--itmfs-bleu);
+    border-color: var(--itmfs-bleu);
+    color: #fff;
+}
+
+.btn-jaune {
+    background-color: var(--itmfs-jaune);
+    border-color: var(--itmfs-jaune);
+    color: #1f2d3d;
+    font-weight: 700;
+}
+
+.btn-jaune:hover {
+    background-color: var(--itmfs-jaune-fonce);
+    border-color: var(--itmfs-jaune-fonce);
+    color: #1f2d3d;
+}
+
+.text-primary { color: var(--itmfs-bleu) !important; }
+.border-left-primary { border-left-color: var(--itmfs-bleu) !important; }
+a { color: var(--itmfs-bleu); }
+a:hover { color: var(--itmfs-bleu-fonce); }
+
+.form-control:focus,
+.custom-select:focus {
+    border-color: var(--itmfs-bleu);
+    box-shadow: 0 0 0 .2rem rgba(0, 85, 122, .2);
+}
+
+/* ---------- Barre latérale ---------- */
+.sidebar .sidebar-brand {
+    height: auto;
+    padding: 1.25rem 1rem;
+}
+
+.sidebar .sidebar-brand-icon img {
+    width: 42px;
+    height: 42px;
+    border-radius: .5rem;
+    object-fit: cover;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .25);
+}
+
+.sidebar .sidebar-brand-text {
+    font-size: 1.05rem;
+    letter-spacing: .08em;
+}
+
+.sidebar .sidebar-heading {
+    color: rgba(255, 255, 255, .55);
+}
+
+.sidebar .nav-item .nav-link {
+    border-left: 4px solid transparent;
+    transition: background-color .15s ease, border-color .15s ease;
+}
+
+.sidebar .nav-item .nav-link:hover {
+    background-color: rgba(255, 255, 255, .08);
+}
+
+.sidebar .nav-item.active .nav-link {
+    border-left-color: var(--itmfs-jaune);
+    background-color: rgba(255, 255, 255, .1);
+}
+
+.sidebar .nav-item.active .nav-link i {
+    color: var(--itmfs-jaune);
+}
+
+/* ---------- Barre du haut ---------- */
+.topbar .titre-page {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--itmfs-gris);
+    margin: 0;
+}
+
+/* ---------- Cartes indicateurs ---------- */
+.carte-indicateur {
+    transition: transform .15s ease, box-shadow .15s ease;
+    color: inherit;
+}
+
+.carte-indicateur:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 .5rem 1.5rem rgba(58, 59, 69, .2) !important;
+    text-decoration: none;
+    color: inherit;
+}
+
+.carte-indicateur .icone {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.carte-indicateur .valeur {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #3a3b45;
+}
+
+.icone-bleu { background-color: var(--itmfs-bleu-clair); color: var(--itmfs-bleu); }
+.icone-vert { background-color: #e3f8f0; color: #1cc88a; }
+.icone-cyan { background-color: #e1f5f8; color: #36b9cc; }
+.icone-jaune { background-color: #fff6d6; color: #c79a00; }
+
+/* ---------- En-tête de page ---------- */
+.entete-page {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    margin-bottom: 1.5rem;
+}
+
+.entete-page h1 {
+    margin: 0;
+}
+
+.entete-page .sous-titre {
+    color: #858796;
+    margin: .25rem 0 0;
+}
+
+/* ---------- Badges de statut ---------- */
+.badge-statut {
+    font-size: .8rem;
+    font-weight: 700;
+    padding: .4em .75em;
+    border-radius: 1rem;
+}
+
+.badge-en-cours { background-color: #fff3cd; color: #8a6d00; }
+.badge-cloture { background-color: #d4f5e6; color: #13855c; }
+
+/* ---------- Tableaux ---------- */
+.table thead th {
+    background-color: #f8f9fc;
+    color: var(--itmfs-gris);
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    border-bottom-width: 1px;
+    white-space: nowrap;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.table .cellule-texte {
+    max-width: 260px;
+    white-space: normal;
+}
+
+.filtres-statut .btn {
+    border-radius: 1rem;
+    font-size: .85rem;
+}
+
+/* ---------- Assistant de formulaire (étapes) ---------- */
+.etapes {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem;
+    counter-reset: etape;
+}
+
+.etapes li {
+    flex: 1;
+    position: relative;
+    text-align: center;
+    color: #b7b9cc;
+    font-weight: 700;
+    font-size: .85rem;
+}
+
+.etapes li::before {
+    counter-increment: etape;
+    content: counter(etape);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin: 0 auto .5rem;
+    border-radius: 50%;
+    background-color: #eaecf4;
+    color: #858796;
+    position: relative;
+    z-index: 1;
+    transition: background-color .2s ease, color .2s ease;
+}
+
+.etapes li:not(:first-child)::after {
+    content: '';
+    position: absolute;
+    top: 1.125rem;
+    left: -50%;
+    width: 100%;
+    height: 3px;
+    background-color: #eaecf4;
+    transition: background-color .2s ease;
+}
+
+.etapes li.active,
+.etapes li.terminee {
+    color: var(--itmfs-bleu);
+}
+
+.etapes li.active::before {
+    background-color: var(--itmfs-bleu);
+    color: #fff;
+    box-shadow: 0 0 0 4px rgba(0, 85, 122, .15);
+}
+
+.etapes li.terminee::before {
+    content: '\2713';
+    background-color: #1cc88a;
+    color: #fff;
+}
+
+.etapes li.active::after,
+.etapes li.terminee::after {
+    background-color: var(--itmfs-bleu);
+}
+
+.etape {
+    display: none;
+    animation: apparition .25s ease;
+}
+
+.etape.active {
+    display: block;
+}
+
+@keyframes apparition {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+}
+
+.actions-etape {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #eaecf4;
+    padding-top: 1rem;
+    margin-top: .5rem;
+}
+
+.champ-nouveau {
+    border-left: 3px solid var(--itmfs-jaune);
+    padding-left: .75rem;
+}
+
+.recapitulatif {
+    background-color: #f8f9fc;
+    border-radius: .5rem;
+    padding: 1rem 1.25rem;
+}
+
+.recapitulatif dt {
+    color: #858796;
+    font-weight: 600;
+    font-size: .8rem;
+    text-transform: uppercase;
+}
+
+.recapitulatif dd {
+    color: #3a3b45;
+    font-weight: 600;
+    margin-bottom: .75rem;
+}
+
+.carte-aide {
+    border-left: 4px solid var(--itmfs-jaune);
+}
+
+/* ---------- Alertes ---------- */
+.alert {
+    border: 0;
+    border-left: 4px solid currentColor;
+    box-shadow: 0 .15rem 1.75rem 0 rgba(58, 59, 69, .1);
+}
+
+/* ---------- Page de connexion ---------- */
+.page-connexion {
+    min-height: 100vh;
+    display: flex;
+    background-color: #f4f6fb;
+}
+
+.page-connexion .panneau-marque {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 3rem;
+    color: #fff;
+    background-color: var(--itmfs-bleu);
+    background-image:
+        radial-gradient(circle at 85% 15%, rgba(255, 203, 5, .35) 0, rgba(255, 203, 5, 0) 40%),
+        linear-gradient(160deg, var(--itmfs-bleu) 0%, var(--itmfs-bleu-fonce) 100%);
+}
+
+.page-connexion .panneau-marque img {
+    width: 84px;
+    height: 84px;
+    border-radius: 1rem;
+    object-fit: cover;
+    box-shadow: 0 .5rem 1.5rem rgba(0, 0, 0, .3);
+    margin-bottom: 2rem;
+}
+
+.page-connexion .panneau-marque h1 {
+    font-weight: 800;
+    font-size: 2.25rem;
+}
+
+.page-connexion .panneau-marque .accent {
+    color: var(--itmfs-jaune);
+}
+
+.page-connexion .panneau-marque ul {
+    list-style: none;
+    padding: 0;
+    margin: 2rem 0 0;
+}
+
+.page-connexion .panneau-marque li {
+    margin-bottom: .75rem;
+    opacity: .9;
+}
+
+.page-connexion .panneau-marque li i {
+    color: var(--itmfs-jaune);
+    width: 1.5rem;
+}
+
+.page-connexion .panneau-formulaire {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+.page-connexion .carte-connexion {
+    width: 100%;
+    max-width: 400px;
+}
+
+@media (max-width: 767.98px) {
+    .page-connexion { flex-direction: column; }
+    .page-connexion .panneau-marque { flex: none; padding: 2rem 1.5rem; }
+    .page-connexion .panneau-marque ul { display: none; }
+    .page-connexion .panneau-marque img { width: 56px; height: 56px; margin-bottom: 1rem; }
+    .page-connexion .panneau-marque h1 { font-size: 1.5rem; }
+}
+
+/* ---------- Pagination des tableaux ---------- */
+.page-item.active .page-link {
+    background-color: var(--itmfs-bleu);
+    border-color: var(--itmfs-bleu);
+}
+
+.page-link {
+    color: var(--itmfs-bleu);
+}

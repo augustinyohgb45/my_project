@@ -41,3 +41,10 @@ class InscriptionTests(TestCase):
         reponse = self.client.post(reverse('inscription'), self.donnees)
         self.assertRedirects(reponse, reverse('acceuil'))
         self.assertTrue(User.objects.filter(username='nouveau').exists())
+
+    def test_case_administrateur_donne_les_droits(self):
+        self.client.force_login(User.objects.create_superuser('admin', password='motdepasse-test'))
+        self.client.post(reverse('inscription'), dict(self.donnees, est_admin='on'))
+        nouveau = User.objects.get(username='nouveau')
+        self.assertTrue(nouveau.is_superuser)
+        self.assertTrue(nouveau.is_staff)

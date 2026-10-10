@@ -1,181 +1,159 @@
+{% extends 'dashboard/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="{% static 'css/incident.css' %}" rel="stylesheet">
-    <title>Changement</title>
-    <style>
-        .step { display: none; }
-        .step.active { display: block; }
-        .error { color: red; }
-        .nouveau { display: none; }
-        .nouveau.visible { display: block; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>Notify change</h2>
-        {% for message in messages %}
-        <div class="alert {{ message.tags }}" role="alert">{{ message }}</div>
-        {% endfor %}
-        {% if form.errors %}
-        <div class="error">
-            <p>Le formulaire contient des erreurs :</p>
-            <ul>
-                {% for field in form %}{% for error in field.errors %}
-                <li>{{ field.label }} : {{ error }}</li>
-                {% endfor %}{% endfor %}
-                {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
-            </ul>
+
+{% block title %}Planifier un changement{% endblock %}
+{% block titre_page %}Changements{% endblock %}
+
+{% block content %}
+<div class="entete-page">
+    <div>
+        <h1 class="h3 text-gray-800">Planifier un changement</h1>
+        <p class="sous-titre">Préparez la notification envoyée aux équipes concernées.</p>
+    </div>
+    <a href="{% url 'listechangement' %}" class="btn btn-light shadow-sm">
+        <i class="fas fa-list mr-1"></i> Voir les changements
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-body p-4">
+                <ol class="etapes">
+                    <li>Identification</li>
+                    <li>Planification</li>
+                    <li>Notification</li>
+                </ol>
+
+                {% for erreur in form.non_field_errors %}
+                <div class="alert alert-danger">{{ erreur }}</div>
+                {% endfor %}
+
+                <form method="post" class="assistant" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Étape 1 : identification -->
+                    <div class="etape">
+                        <div class="form-row">
+                            <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.Numero_ticket %}</div>
+                            <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.nom_plateforme %}</div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="services_impacte" class="font-weight-bold small text-gray-700">Service impacté <span class="text-danger">*</span></label>
+                                    <select id="services_impacte" name="services_impacte" class="custom-select" data-nouveau="nouveau-service">
+                                        {% for service in form.services_impacte.field.queryset %}
+                                        <option value="{{ service.id }}"{% if form.services_impacte.value|stringformat:"s" == service.id|stringformat:"s" %} selected{% endif %}>{{ service }}</option>
+                                        {% endfor %}
+                                        <option value=""{% if form.is_bound and not form.services_impacte.value %} selected{% endif %}>+ Ajouter un nouveau service</option>
+                                    </select>
+                                </div>
+                                <div id="nouveau-service" class="champ-nouveau d-none">
+                                    {% include 'dashboard/includes/champ.html' with champ=form.nouveau_service %}
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="Type_requette_changement" class="font-weight-bold small text-gray-700">Type de changement <span class="text-danger">*</span></label>
+                                    <select id="Type_requette_changement" name="Type_requette_changement" class="custom-select" data-nouveau="nouveau-type">
+                                        {% for type in form.Type_requette_changement.field.queryset %}
+                                        <option value="{{ type.id }}"{% if form.Type_requette_changement.value|stringformat:"s" == type.id|stringformat:"s" %} selected{% endif %}>{{ type }}</option>
+                                        {% endfor %}
+                                        <option value=""{% if form.is_bound and not form.Type_requette_changement.value %} selected{% endif %}>+ Ajouter un nouveau type</option>
+                                    </select>
+                                </div>
+                                <div id="nouveau-type" class="champ-nouveau d-none">
+                                    {% include 'dashboard/includes/champ.html' with champ=form.nouveau_type %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="actions-etape">
+                            <a href="{% url 'acceuil' %}" class="btn btn-light">Annuler</a>
+                            <button type="button" class="btn btn-primary" data-etape="suivante">
+                                Suivant <i class="fas fa-arrow-right ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Étape 2 : planification -->
+                    <div class="etape">
+                        <div class="form-row">
+                            <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.date_changement %}</div>
+                            <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.fin_changement %}</div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.heure_debut %}</div>
+                            <div class="col-md-6">{% include 'dashboard/includes/champ.html' with champ=form.heure_fin %}</div>
+                        </div>
+                        {% include 'dashboard/includes/champ.html' with champ=form.date_envoie %}
+
+                        <div class="actions-etape">
+                            <button type="button" class="btn btn-light" data-etape="precedente">
+                                <i class="fas fa-arrow-left mr-1"></i> Précédent
+                            </button>
+                            <button type="button" class="btn btn-primary" data-etape="suivante">
+                                Suivant <i class="fas fa-arrow-right ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Étape 3 : notification et récapitulatif -->
+                    <div class="etape" data-recapitulatif>
+                        {% include 'dashboard/includes/champ.html' with champ=form.description %}
+                        <div class="form-row">
+                            <div class="col-md-8">{% include 'dashboard/includes/champ.html' with champ=form.destinataire_nouveau %}</div>
+                            <div class="col-md-4">{% include 'dashboard/includes/champ.html' with champ=form.statut %}</div>
+                        </div>
+
+                        <h6 class="font-weight-bold text-gray-800 mt-2 mb-3">Récapitulatif</h6>
+                        <dl class="recapitulatif row mb-3">
+                            <div class="col-sm-6">
+                                <dt>Ticket</dt><dd data-recap="Numero_ticket"></dd>
+                                <dt>Service</dt><dd data-recap="services_impacte"></dd>
+                                <dt>Type</dt><dd data-recap="Type_requette_changement"></dd>
+                                <dt>Plateforme</dt><dd data-recap="nom_plateforme"></dd>
+                            </div>
+                            <div class="col-sm-6">
+                                <dt>Début</dt><dd data-recap="date_changement"></dd>
+                                <dt>Fin</dt><dd data-recap="fin_changement"></dd>
+                                <dt>Créneau annoncé</dt><dd><span data-recap="heure_debut"></span> – <span data-recap="heure_fin"></span></dd>
+                                <dt>Envoi de la notification</dt><dd data-recap="date_envoie"></dd>
+                            </div>
+                        </dl>
+
+                        <div class="actions-etape">
+                            <button type="button" class="btn btn-light" data-etape="precedente">
+                                <i class="fas fa-arrow-left mr-1"></i> Précédent
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane mr-1"></i> Enregistrer et notifier
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
-        {% endif %}
-        <form id="changeForm" method="post">
-            {% csrf_token %}
-
-            <!-- Étape 1 -->
-            <div class="step active" id="step1">
-                <div class="form-group">
-                    <label for="{{ form.Numero_ticket.id_for_label }}">Ticket_number</label>
-                    {{ form.Numero_ticket }}
-                </div>
-
-                <div class="form-group">
-                    <label for="services_impacte">Service</label>
-                    <select id="services_impacte" name="services_impacte" data-nouveau="new-service-container">
-                        {% for service in form.services_impacte.field.queryset %}
-                        <option value="{{ service.id }}"{% if form.services_impacte.value|stringformat:"s" == service.id|stringformat:"s" %} selected{% endif %}>{{ service }}</option>
-                        {% endfor %}
-                        <option value=""{% if form.is_bound and not form.services_impacte.value %} selected{% endif %}>+ Ajouter un nouveau service</option>
-                    </select>
-                </div>
-
-                <div class="form-group nouveau" id="new-service-container">
-                    <label for="{{ form.nouveau_service.id_for_label }}">{{ form.nouveau_service.label }}</label>
-                    {{ form.nouveau_service }}
-                </div>
-
-                <div class="form-group">
-                    <label for="Type_requette_changement">Type of change</label>
-                    <select id="Type_requette_changement" name="Type_requette_changement" data-nouveau="new-type-container">
-                        {% for type in form.Type_requette_changement.field.queryset %}
-                        <option value="{{ type.id }}"{% if form.Type_requette_changement.value|stringformat:"s" == type.id|stringformat:"s" %} selected{% endif %}>{{ type }}</option>
-                        {% endfor %}
-                        <option value=""{% if form.is_bound and not form.Type_requette_changement.value %} selected{% endif %}>+ Ajouter un nouveau type</option>
-                    </select>
-                </div>
-
-                <div class="form-group nouveau" id="new-type-container">
-                    <label for="{{ form.nouveau_type.id_for_label }}">{{ form.nouveau_type.label }}</label>
-                    {{ form.nouveau_type }}
-                </div>
-
-                <button type="button" onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Étape 2 -->
-            <div class="step" id="step2">
-                <div class="form-group">
-                    <label for="{{ form.date_changement.id_for_label }}">Change of date</label>
-                    {{ form.date_changement }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.fin_changement.id_for_label }}">Change of change</label>
-                    {{ form.fin_changement }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.date_envoie.id_for_label }}">Sending date</label>
-                    {{ form.date_envoie }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.description.id_for_label }}">Comment</label>
-                    {{ form.description }}
-                </div>
-                <button type="button" onclick="prevStep()">Previous</button>
-                <button type="button" onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Étape 3 -->
-            <div class="step" id="step3">
-                <div class="form-group">
-                    <label for="{{ form.heure_debut.id_for_label }}">Start time</label>
-                    {{ form.heure_debut }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.heure_fin.id_for_label }}">End time</label>
-                    {{ form.heure_fin }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.nom_plateforme.id_for_label }}">Platform Name</label>
-                    {{ form.nom_plateforme }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.destinataire_nouveau.id_for_label }}">New Recipient</label>
-                    {{ form.destinataire_nouveau }}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.statut.id_for_label }}">Status</label>
-                    {{ form.statut }}
-                </div>
-                <button type="button" onclick="prevStep()">Previous</button>
-                <button type="submit">Send</button>
-            </div>
-        </form>
     </div>
 
-    <script>
-        // Affiche le champ « nouveau » quand l'option « + Ajouter… » (valeur vide) est choisie
-        function majChampNouveau(select) {
-            const conteneur = document.getElementById(select.dataset.nouveau);
-            const visible = select.value === '';
-            conteneur.classList.toggle('visible', visible);
-            conteneur.querySelector('input').required = visible;
-        }
+    <div class="col-lg-4">
+        <div class="card shadow mb-4 carte-aide">
+            <div class="card-body">
+                <h6 class="font-weight-bold text-gray-800"><i class="fas fa-lightbulb text-warning mr-2"></i>Bon à savoir</h6>
+                <ul class="small text-gray-700 pl-3 mb-0">
+                    <li class="mb-2">Si la date d'envoi est passée, l'e-mail part dès l'enregistrement ; sinon il part automatiquement à la date prévue.</li>
+                    <li class="mb-2">Le message dépend du type de changement. Les destinataires du type sont configurés dans l'admin.</li>
+                    <li>Un service ou un type absent de la liste peut être ajouté avec l'option « + Ajouter… ».</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
-        let currentStep = 1;
-        const steps = document.querySelectorAll('.step');
-
-        function showStep(step) {
-            steps.forEach((element, index) => {
-                element.classList.toggle('active', index + 1 === step);
-            });
-        }
-
-        function validateStep(step) {
-            let isValid = true;
-            steps[step - 1].querySelectorAll('input, select, textarea').forEach(field => {
-                if (field.required && !field.value.trim()) {
-                    isValid = false;
-                    field.style.borderColor = 'red';
-                } else {
-                    field.style.borderColor = '';
-                }
-            });
-            return isValid;
-        }
-
-        function nextStep() {
-            if (validateStep(currentStep) && currentStep < steps.length) {
-                currentStep++;
-                showStep(currentStep);
-            }
-        }
-
-        function prevStep() {
-            if (currentStep > 1) {
-                currentStep--;
-                showStep(currentStep);
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('select[data-nouveau]').forEach(select => {
-                majChampNouveau(select);
-                select.addEventListener('change', () => majChampNouveau(select));
-            });
-            showStep(currentStep);
-        });
-    </script>
-</body>
-</html>
+{% block extra_js %}
+<script src="{% static 'js/assistant-formulaire.js' %}"></script>
+{% endblock %}

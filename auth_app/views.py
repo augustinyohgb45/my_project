@@ -1,10 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, redirect
 from django.utils.http import url_has_allowed_host_and_scheme
+
+from .forms import NouvelUtilisateurForm
 
 
 @login_required
@@ -19,13 +20,13 @@ def inscription(request):
         raise PermissionDenied
 
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = NouvelUtilisateurForm(request.POST)
         if form.is_valid():
             utilisateur = form.save()
             messages.success(request, f"L'utilisateur « {utilisateur.username} » a été créé.")
             return redirect('acceuil')
     else:
-        form = UserCreationForm()
+        form = NouvelUtilisateurForm()
 
     return render(request, 'auth/inscription.html', {'form': form})
 
