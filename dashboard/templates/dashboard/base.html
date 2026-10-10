@@ -72,30 +72,6 @@
                 </a>
             </li>
 
-            <hr class="sidebar-divider">
-            <div class="sidebar-heading">Bar Dynasty</div>
-
-            <li class="nav-item{% if page == 'bar_stock' or page == 'bar_produit_nouveau' or page == 'bar_produit_modifier' %} active{% endif %}">
-                <a class="nav-link" href="{% url 'bar_stock' %}">
-                    <i class="fas fa-fw fa-wine-bottle"></i>
-                    <span>Stock du bar</span>
-                </a>
-            </li>
-            <li class="nav-item{% if page == 'bar_mouvements' %} active{% endif %}">
-                <a class="nav-link" href="{% url 'bar_mouvements' %}">
-                    <i class="fas fa-fw fa-exchange-alt"></i>
-                    <span>Mouvements</span>
-                </a>
-            </li>
-            {% if user.is_superuser %}
-            <li class="nav-item{% if page == 'bar_importer' %} active{% endif %}">
-                <a class="nav-link" href="{% url 'bar_importer' %}">
-                    <i class="fas fa-fw fa-file-import"></i>
-                    <span>Importer le catalogue</span>
-                </a>
-            </li>
-            {% endif %}
-
             {% if user.is_superuser %}
             <hr class="sidebar-divider">
             <div class="sidebar-heading">Administration</div>
