@@ -1,0 +1,8 @@
+{% if action == 'connexion' %}<span class="badge badge-statut badge-audit-connexion"><i class="fas fa-sign-in-alt mr-1"></i>{{ libelle }}</span>
+{% elif action == 'deconnexion' %}<span class="badge badge-statut badge-inactif"><i class="fas fa-sign-out-alt mr-1"></i>{{ libelle }}</span>
+{% elif action == 'echec_connexion' %}<span class="badge badge-statut badge-audit-echec"><i class="fas fa-user-lock mr-1"></i>{{ libelle }}</span>
+{% elif action == 'creation' %}<span class="badge badge-statut badge-audit-creation"><i class="fas fa-plus mr-1"></i>{{ libelle }}</span>
+{% elif action == 'cloture' %}<span class="badge badge-statut badge-cloture"><i class="fas fa-check mr-1"></i>{{ libelle }}</span>
+{% elif action == 'notification' %}<span class="badge badge-statut badge-utilisateur"><i class="fas fa-paper-plane mr-1"></i>{{ libelle }}</span>
+{% elif action == 'suppression' %}<span class="badge badge-statut badge-audit-echec"><i class="fas fa-trash mr-1"></i>{{ libelle }}</span>
+{% else %}<span class="badge badge-statut badge-en-cours"><i class="fas fa-pen mr-1"></i>{{ libelle }}</span>{% endif %}

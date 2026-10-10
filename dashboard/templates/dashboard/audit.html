@@ -1,0 +1,189 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Journal d'audit{% endblock %}
+{% block titre_page %}Administration{% endblock %}
+
+{% block content %}
+<div class="entete-page">
+    <div>
+        <h1 class="h3 text-gray-800">Journal d'audit</h1>
+        <p class="sous-titre">Qui s'est connecté, qui a créé, clôturé ou modifié quoi, et quand.</p>
+    </div>
+    <a href="?{{ parametres }}{% if parametres %}&amp;{% endif %}export=csv" class="btn btn-light shadow-sm">
+        <i class="fas fa-file-csv mr-1 text-success"></i> Exporter en CSV
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card carte-indicateur border-left-primary shadow h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Connexions aujourd'hui</div>
+                    <div class="valeur">{{ nb_connexions_jour }}</div>
+                </div>
+                <div class="icone icone-bleu"><i class="fas fa-sign-in-alt"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card carte-indicateur border-left-info shadow h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Utilisateurs connectés aujourd'hui</div>
+                    <div class="valeur">{{ nb_connectes_jour }}</div>
+                </div>
+                <div class="icone icone-cyan"><i class="fas fa-users"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card carte-indicateur border-left-success shadow h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Actions aujourd'hui</div>
+                    <div class="valeur">{{ nb_actions_jour }}</div>
+                </div>
+                <div class="icone icone-vert"><i class="fas fa-tasks"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card carte-indicateur border-left-danger shadow h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Échecs de connexion (7 j)</div>
+                    <div class="valeur">{{ nb_echecs_7j }}</div>
+                </div>
+                <div class="icone icone-rouge"><i class="fas fa-user-lock"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <form method="get" class="form-row align-items-end">
+            <div class="col-lg-2 col-md-4 mb-2">
+                <label class="small font-weight-bold text-gray-700 mb-1" for="periode">Période</label>
+                <select name="periode" id="periode" class="custom-select custom-select-sm" onchange="this.form.submit()">
+                    {% for cle, libelle in periodes %}
+                    <option value="{{ cle }}"{% if filtres.periode == cle %} selected{% endif %}>{{ libelle }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-4 mb-2">
+                <label class="small font-weight-bold text-gray-700 mb-1" for="utilisateur">Utilisateur</label>
+                <select name="utilisateur" id="utilisateur" class="custom-select custom-select-sm" onchange="this.form.submit()">
+                    <option value="">Tous</option>
+                    {% for nom in utilisateurs %}
+                    <option value="{{ nom }}"{% if filtres.utilisateur == nom %} selected{% endif %}>{{ nom }}</option>
+                    {% endfor %}
+                    <option value="systeme"{% if filtres.utilisateur == 'systeme' %} selected{% endif %}>Système / anonyme</option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-4 mb-2">
+                <label class="small font-weight-bold text-gray-700 mb-1" for="action">Action</label>
+                <select name="action" id="action" class="custom-select custom-select-sm" onchange="this.form.submit()">
+                    <option value="">Toutes</option>
+                    {% for cle, libelle in actions %}
+                    <option value="{{ cle }}"{% if filtres.action == cle %} selected{% endif %}>{{ libelle }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-4 mb-2">
+                <label class="small font-weight-bold text-gray-700 mb-1" for="type_objet">Élément</label>
+                <select name="type_objet" id="type_objet" class="custom-select custom-select-sm" onchange="this.form.submit()">
+                    <option value="">Tous</option>
+                    {% for type in types_objet %}
+                    <option value="{{ type }}"{% if filtres.type_objet == type %} selected{% endif %}>{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-2">
+                <label class="small font-weight-bold text-gray-700 mb-1" for="q">Recherche</label>
+                <input type="search" name="q" id="q" value="{{ filtres.q }}" class="form-control form-control-sm" placeholder="Ticket, nom, détail…">
+            </div>
+            <div class="col-lg-1 col-md-2 mb-2 text-nowrap">
+                <button type="submit" class="btn btn-sm btn-primary" title="Filtrer"><i class="fas fa-search"></i></button>
+                <a href="{% url 'audit' %}" class="btn btn-sm btn-light border" title="Réinitialiser"><i class="fas fa-undo"></i></a>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-body">
+        <p class="small text-muted mb-3">
+            {{ page_journal.paginator.count }} entrée{{ page_journal.paginator.count|pluralize }}
+            {% if page_journal.paginator.num_pages > 1 %}· page {{ page_journal.number }} sur {{ page_journal.paginator.num_pages }}{% endif %}
+        </p>
+
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Utilisateur</th>
+                        <th>Action</th>
+                        <th>Élément</th>
+                        <th>Détails</th>
+                        <th>Adresse IP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entree in page_journal %}
+                    <tr>
+                        <td class="text-nowrap">
+                            <div class="font-weight-bold text-gray-800">{{ entree.date|date:"d/m/Y" }}</div>
+                            <div class="small text-muted">{{ entree.date|date:"H:i:s" }}</div>
+                        </td>
+                        <td class="text-nowrap">
+                            {% if entree.nom_utilisateur %}
+                            <span class="avatar-initiales avatar-petit mr-2">{{ entree.nom_utilisateur|slice:":2"|upper }}</span>{{ entree.nom_utilisateur }}
+                            {% else %}
+                            <span class="avatar-initiales avatar-petit avatar-systeme mr-2"><i class="fas fa-cog"></i></span><span class="text-muted">Système</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-nowrap">{% include 'dashboard/includes/badge_action.html' with action=entree.action libelle=entree.get_action_display %}</td>
+                        <td>
+                            <div class="font-weight-bold text-gray-800">{{ entree.objet|default:"—" }}</div>
+                            {% if entree.type_objet %}<div class="small text-muted">{{ entree.type_objet }}</div>{% endif %}
+                        </td>
+                        <td class="cellule-texte small details-audit">{{ entree.details|default:""|linebreaksbr }}</td>
+                        <td class="small text-muted text-nowrap">{{ entree.adresse_ip|default:"—" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-5">
+                            <i class="fas fa-search fa-2x mb-2 text-gray-300 d-block"></i>
+                            Aucune entrée pour ces filtres.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_journal.paginator.num_pages > 1 %}
+        <nav aria-label="Pages du journal">
+            <ul class="pagination pagination-sm justify-content-end mb-0">
+                <li class="page-item{% if not page_journal.has_previous %} disabled{% endif %}">
+                    <a class="page-link" href="{% if page_journal.has_previous %}?{{ parametres }}{% if parametres %}&amp;{% endif %}page={{ page_journal.previous_page_number }}{% else %}#{% endif %}">Précédent</a>
+                </li>
+                {% for numero in page_journal.paginator.page_range %}
+                {% if numero == page_journal.number %}
+                <li class="page-item active"><span class="page-link">{{ numero }}</span></li>
+                {% elif numero == 1 or numero == page_journal.paginator.num_pages or numero >= page_journal.number|add:-2 and numero <= page_journal.number|add:2 %}
+                <li class="page-item"><a class="page-link" href="?{{ parametres }}{% if parametres %}&amp;{% endif %}page={{ numero }}">{{ numero }}</a></li>
+                {% elif numero == page_journal.number|add:-3 or numero == page_journal.number|add:3 %}
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+                {% endif %}
+                {% endfor %}
+                <li class="page-item{% if not page_journal.has_next %} disabled{% endif %}">
+                    <a class="page-link" href="{% if page_journal.has_next %}?{{ parametres }}{% if parametres %}&amp;{% endif %}page={{ page_journal.next_page_number }}{% else %}#{% endif %}">Suivant</a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

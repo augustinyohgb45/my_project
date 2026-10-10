@@ -9,4 +9,5 @@ urlpatterns = [
     path('listechangement/', views.listechangement, name='listechangement'),#route liste changement
     path('action_statut/<int:incident_id>', views.action_statut, name='action_statut'),
     path('action_statut_change/<int:changement_id>', views.action_statut_change, name='action_statut_change'),
+    path('audit/', views.audit, name='audit'),  # journal d'audit (administrateurs)
 ]

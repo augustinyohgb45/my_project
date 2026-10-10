@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Incident, Destinataire, Service, Changement, Type_requette, Type_requette_changemen
+from .models import Incident, Destinataire, Service, Changement, Type_requette, Type_requette_changemen, JournalAudit
 
 
 @admin.register(Service)
@@ -40,3 +40,20 @@ class AdminTypeRequete(admin.ModelAdmin):
 class AdminTypeRequeteChangement(admin.ModelAdmin):
     list_display = ['nom_requette_changement']
     filter_horizontal = ['destinataires']
+
+
+@admin.register(JournalAudit)
+class AdminJournalAudit(admin.ModelAdmin):
+    """Consultation seule : le journal ne doit pas pouvoir être modifié."""
+    list_display = ['date', 'nom_utilisateur', 'action', 'type_objet', 'objet', 'adresse_ip']
+    list_filter = ['action', 'type_objet', 'date']
+    search_fields = ['nom_utilisateur', 'objet', 'details']
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

@@ -62,6 +62,9 @@ class Changement(models.Model):
     email_envoye = models.BooleanField(default=False)
     Type_requette_changement = models.ForeignKey(Type_requette_changemen, on_delete=models.PROTECT)
 
+    def __str__(self):
+        return f"Changement {self.Numero_ticket}"
+
     def save(self, *args, **kwargs):
         # en_cours reste toujours cohérent avec le statut
         self.en_cours = self.statut == "E"
@@ -81,7 +84,50 @@ class Incident(models.Model):
     en_cours = models.BooleanField(default=True)
     type_requette = models.ForeignKey(Type_requette, on_delete=models.PROTECT)
 
+    def __str__(self):
+        return f"Incident {self.numero_ticket}"
+
     def save(self, *args, **kwargs):
         # en_cours reste toujours cohérent avec le statut
         self.en_cours = self.statut == "E"
         super().save(*args, **kwargs)
+
+
+class JournalAudit(models.Model):
+    """Trace d'une action : connexion, création, clôture, modification ou suppression."""
+    CONNEXION = 'connexion'
+    DECONNEXION = 'deconnexion'
+    ECHEC_CONNEXION = 'echec_connexion'
+    CREATION = 'creation'
+    MODIFICATION = 'modification'
+    CLOTURE = 'cloture'
+    NOTIFICATION = 'notification'
+    SUPPRESSION = 'suppression'
+    ACTIONS = (
+        (CONNEXION, "Connexion"),
+        (DECONNEXION, "Déconnexion"),
+        (ECHEC_CONNEXION, "Échec de connexion"),
+        (CREATION, "Création"),
+        (MODIFICATION, "Modification"),
+        (CLOTURE, "Clôture"),
+        (NOTIFICATION, "Notification envoyée"),
+        (SUPPRESSION, "Suppression"),
+    )
+
+    date = models.DateTimeField(auto_now_add=True, db_index=True)
+    # Conservé même si le compte est supprimé ; nom_utilisateur garde la trace du nom
+    utilisateur = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='audits')
+    nom_utilisateur = models.CharField(max_length=150, blank=True)
+    action = models.CharField(max_length=20, choices=ACTIONS, db_index=True)
+    type_objet = models.CharField(max_length=50, blank=True, db_index=True)
+    objet = models.CharField(max_length=255, blank=True)
+    details = models.TextField(blank=True)
+    adresse_ip = models.GenericIPAddressField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-date', '-id']
+        verbose_name = "entrée du journal d'audit"
+        verbose_name_plural = "journal d'audit"
+
+    def __str__(self):
+        return f"{self.date:%d/%m/%Y %H:%M} · {self.nom_utilisateur or 'Système'} · {self.get_action_display()} {self.objet}"

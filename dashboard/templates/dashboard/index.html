@@ -154,6 +154,27 @@
     </div>
 </div>
 
+{% if dernieres_activites is not None %}
+<div class="card shadow mb-4 activite-recente">
+    <div class="card-header py-3 d-flex align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-history mr-2"></i>Activité récente</h6>
+        <a href="{% url 'audit' %}" class="small">Journal d'audit complet <i class="fas fa-arrow-right"></i></a>
+    </div>
+    <div class="list-group list-group-flush">
+        {% for entree in dernieres_activites %}
+        <div class="list-group-item d-flex flex-wrap align-items-center">
+            <span class="small text-muted mr-3 text-nowrap" style="min-width: 7.5rem">{{ entree.date|date:"d/m/Y H:i" }}</span>
+            <span class="font-weight-bold text-gray-800 mr-2">{{ entree.nom_utilisateur|default:"Système" }}</span>
+            <span class="mr-2">{% include 'dashboard/includes/badge_action.html' with action=entree.action libelle=entree.get_action_display %}</span>
+            <span class="text-gray-700">{{ entree.objet }}</span>
+        </div>
+        {% empty %}
+        <div class="list-group-item text-center text-muted py-4">Aucune activité enregistrée pour l'instant.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
 {{ graphique|json_script:"donnees-graphique" }}
 {{ nb_incident_en_cours|add:nb_incidents_clotures|json_script:"total-incidents" }}
 {{ nb_changement_en_cours|add:nb_changements_clotures|json_script:"total-changements" }}

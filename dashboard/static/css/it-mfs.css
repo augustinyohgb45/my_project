@@ -444,3 +444,29 @@ a:hover { color: var(--itmfs-bleu-fonce); }
     background-color: var(--itmfs-bleu);
     border-color: var(--itmfs-bleu);
 }
+
+/* ---------- Journal d'audit ---------- */
+.badge-audit-connexion { background-color: #e1f5f8; color: #1f7a87; }
+.badge-audit-creation { background-color: var(--itmfs-bleu-clair); color: var(--itmfs-bleu); }
+.badge-audit-echec { background-color: #fde2df; color: #b02a1c; }
+.icone-rouge { background-color: #fde2df; color: #e74a3b; }
+
+.avatar-initiales.avatar-petit {
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: .65rem;
+}
+
+.avatar-initiales.avatar-systeme {
+    background-color: #f1f1f4;
+    color: #858796;
+}
+
+.details-audit {
+    color: #5a5c69;
+    line-height: 1.5;
+}
+
+.activite-recente .list-group-item {
+    padding: .65rem 1.25rem;
+}

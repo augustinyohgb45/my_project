@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import Changement, Destinataire, Service, Type_requette, Incident, Type_requette_changemen
+from .models import Changement, Destinataire, Incident, JournalAudit, Service, Type_requette, Type_requette_changemen
 
 
 class EmailChangementTests(TestCase):
@@ -205,3 +205,88 @@ class ValidationFormulairesTests(TestCase):
         self.assertEqual(reponse.status_code, 200)
         self.assertContains(reponse, 'is-invalid')
         self.assertEqual(Changement.objects.count(), 0)
+
+
+class JournalAuditTests(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_superuser('admin', password='motdepasse-test')
+        self.agent = User.objects.create_user('agent', password='motdepasse-test')
+        self.service = Service.objects.create(nom='Mobile Money')
+        self.type_incident = Type_requette.objects.create(nom_requette='indisponibilite')
+
+    def actions(self, **filtres):
+        return list(JournalAudit.objects.filter(**filtres).values_list('nom_utilisateur', 'action', 'objet'))
+
+    def test_connexion_deconnexion_et_echec(self):
+        self.client.post(reverse('connexion'), {'username': 'agent', 'password': 'faux'})
+        self.client.post(reverse('connexion'), {'username': 'agent', 'password': 'motdepasse-test'})
+        self.client.get(reverse('deconnexion'))
+        self.assertEqual(
+            [(a, o) for _, a, o in reversed(self.actions(type_objet='Session'))],
+            [('echec_connexion', 'agent'), ('connexion', 'agent'), ('deconnexion', 'agent')],
+        )
+        self.assertEqual(JournalAudit.objects.filter(action='connexion').get().adresse_ip, '127.0.0.1')
+
+    def test_creation_et_cloture_d_incident(self):
+        self.client.force_login(self.agent)
+        self.client.post(reverse('incident'), {
+            'numero_ticket': 'INC777', 'services_impacte': self.service.id, 'type_requette': self.type_incident.id,
+            'description': 'Panne', 'destinataire_nouveau': 'support@example.com',
+            'date_envoie': timezone.localtime().strftime('%Y-%m-%dT%H:%M'), 'statut': 'E',
+        })
+        incident = Incident.objects.get()
+        self.client.post(reverse('action_statut', args=[incident.id]))
+        self.assertIn(('agent', 'creation', 'Incident INC777'), self.actions(type_objet='Incident'))
+        cloture = JournalAudit.objects.get(action='cloture')
+        self.assertEqual(cloture.nom_utilisateur, 'agent')
+        self.assertIn('Statut : en cours → clôturé', cloture.details)
+
+    def test_notification_planifiee_attribuee_au_systeme(self):
+        destinataire = Destinataire.objects.create(nom='Equipe', contact='0000000000', email='equipe@example.com')
+        type_chg = Type_requette_changemen.objects.create(nom_requette_changement='Configuration Downtime')
+        type_chg.destinataires.add(destinataire)
+        maintenant = timezone.now()
+        Changement.objects.create(
+            Numero_ticket='CHG1', services_impacte=self.service, date_changement=maintenant,
+            fin_changement=maintenant + timedelta(hours=1), heure_debut='22:00', heure_fin='23:00',
+            date_envoie=maintenant - timedelta(minutes=1), description='Test', user=self.agent,
+            Type_requette_changement=type_chg,
+        )
+        call_command('envoyer_emails_planifies')
+        notification = JournalAudit.objects.get(action='notification')
+        self.assertEqual(notification.nom_utilisateur, '')
+        self.assertEqual(notification.objet, 'Changement CHG1')
+        # Ajout d'un destinataire sur le type : tracé lui aussi
+        self.assertTrue(JournalAudit.objects.filter(action='modification', details__contains='ajouté(s) : Equipe').exists())
+
+    def test_modification_d_utilisateur_detaillee(self):
+        self.client.force_login(self.admin)
+        self.client.post(reverse('modifier_utilisateur', args=[self.agent.id]), {
+            'first_name': 'Awa', 'last_name': '', 'email': '', 'is_active': 'on', 'est_admin': 'on',
+        })
+        entree = JournalAudit.objects.get(action='modification', type_objet='Utilisateur')
+        self.assertEqual(entree.nom_utilisateur, 'admin')
+        self.assertIn('Prénom : — → Awa', entree.details)
+        self.assertIn('Administrateur : non → oui', entree.details)
+
+    def test_page_reservee_aux_administrateurs(self):
+        self.client.force_login(self.agent)
+        self.assertEqual(self.client.get(reverse('audit')).status_code, 403)
+        self.client.force_login(self.admin)
+        self.assertEqual(self.client.get(reverse('audit')).status_code, 200)
+
+    def test_filtres_et_export_csv(self):
+        self.client.post(reverse('connexion'), {'username': 'agent', 'password': 'motdepasse-test'})
+        self.client.force_login(self.admin)
+        reponse = self.client.get(reverse('audit'), {'utilisateur': 'agent', 'action': 'connexion'})
+        self.assertEqual(reponse.context['page_journal'].paginator.count, 1)
+        csv_reponse = self.client.get(reverse('audit'), {'utilisateur': 'agent', 'export': 'csv'})
+        self.assertEqual(csv_reponse['Content-Type'], 'text/csv; charset=utf-8')
+        contenu = csv_reponse.content.decode('utf-8-sig')
+        self.assertIn('agent;Connexion;Session;agent', contenu)
+
+    def test_activite_recente_visible_seulement_par_les_administrateurs(self):
+        self.client.force_login(self.agent)
+        self.assertNotContains(self.client.get(reverse('acceuil')), 'Activité récente')
+        self.client.force_login(self.admin)
+        self.assertContains(self.client.get(reverse('acceuil')), 'Activité récente')

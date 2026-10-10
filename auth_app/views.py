@@ -1,26 +1,13 @@
-from functools import wraps
-
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
+from .decorators import superadmin_requis
 from .forms import ModifierUtilisateurForm, NouveauMotDePasseForm, NouvelUtilisateurForm
-
-
-def superadmin_requis(vue):
-    """Réserve la vue aux administrateurs connectés (403 pour les autres)."""
-    @login_required
-    @wraps(vue)
-    def vue_protegee(request, *args, **kwargs):
-        if not request.user.is_superuser:
-            raise PermissionDenied
-        return vue(request, *args, **kwargs)
-    return vue_protegee
 
 
 @login_required
